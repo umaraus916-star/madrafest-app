@@ -6,84 +6,51 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// എല്ലാ സ്റ്റാറ്റിക് ഫയലുകളും (HTML, CSS, JS) ഓട്ടോമാറ്റിക് ആയി ലോഡ് ചെയ്യാൻ ഇത് സഹായിക്കും
+// static ഫയലുകൾ രണ്ട് ഫോൾഡറുകളിൽ നിന്നും ലോഡ് ചെയ്യാൻ അനുവദിക്കുന്നു
 app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// 🌐 എല്ലാ പ്രധാന പേജുകളുടെയും റൂട്ടുകൾ (Routing) താഴെ നൽകുന്നു:
+// ഫയലുകൾ എവിടെയാണെങ്കിലും കണ്ടെത്തി അയക്കാനുള്ള ഫങ്ഷൻ
+const sendHtmlFile = (fileName, res) => {
+    let filePath = path.join(__dirname, fileName);
+    // മെയിൻ ഫോൾഡറിൽ ഇല്ലെങ്കിൽ public ഫോൾഡറിൽ നോക്കും
+    if (!fs.existsSync(filePath)) {
+        filePath = path.join(__dirname, 'public', fileName);
+    }
+    
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send(`<h3>Error 404: ${fileName} കണ്ടെത്തിയില്ല!</h3><p>നിങ്ങളുടെ ഫോൾഡറിൽ ഫയലിന്റെ പേര് കൃത്യമാണോ എന്ന് പരിശോധിക്കുക.</p>`);
+    }
+};
 
-// 1. ഹോം പേജ് (Home Page)
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'home.html'));
-});
-app.get('/home.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'home.html'));
-});
+// 🌐 റൂട്ടുകൾ
+app.get('/', (req, res) => sendHtmlFile('home.html', res));
+app.get('/home.html', (req, res) => sendHtmlFile('home.html', res));
+app.get('/admin.html', (req, res) => sendHtmlFile('admin.html', res));
+app.get('/judge.html', (req, res) => sendHtmlFile('judge.html', res));
+app.get('/result.html', (req, res) => sendHtmlFile('result.html', res));
 
-// 2. അഡ്മിൻ പാനൽ (Admin Panel)
-app.get('/admin.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
-});
-
-// 3. ജഡ്ജിങ് പാനൽ (Judge Panel)
-app.get('/judge.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'judge.html'));
-});
-
-// 4. റിസൾട്ട് ബോർഡ് (Result Board)
-app.get('/result.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'result.html'));
-});
-
-
-// 📋 കുട്ടികളുടെ ലിസ്റ്റ് എടുക്കാനുള്ള API
+// 📋 API
 app.get('/api/students', (req, res) => {
-    const jsonPath = path.join(__dirname, 'students.json');
+    let jsonPath = path.join(__dirname, 'students.json');
+    if (!fs.existsSync(jsonPath)) jsonPath = path.join(__dirname, 'public', 'students.json');
+    
     fs.readFile(jsonPath, 'utf8', (err, data) => {
         if (err) return res.json([]);
         res.json(JSON.parse(data));
     });
 });
 
-// ➕ പുതിയ കുട്ടിയെ ആഡ് ചെയ്യാൻ
 app.post('/api/students', (req, res) => {
-    const jsonPath = path.join(__dirname, 'students.json');
+    let jsonPath = path.join(__dirname, 'students.json');
+    if (!fs.existsSync(jsonPath)) jsonPath = path.join(__dirname, 'public', 'students.json');
+    
     fs.readFile(jsonPath, 'utf8', (err, data) => {
         let students = err ? [] : JSON.parse(data);
         students.push(req.body);
-        fs.writeFile(jsonPath, JSON.stringify(students, null, 2), () => {
-            res.json({ message: "Success" });
-        });
-    });
-});
-
-// 📝 കുട്ടിയുടെ വിവരങ്ങൾ തിരുത്താൻ
-app.put('/api/students/:id', (req, res) => {
-    const jsonPath = path.join(__dirname, 'students.json');
-    fs.readFile(jsonPath, 'utf8', (err, data) => {
-        if (err) return res.status(500).json({ error: "Error" });
-        let students = JSON.parse(data);
-        const index = students.findIndex(s => s.id === req.params.id);
-        if (index !== -1) {
-            students[index] = { ...students[index], ...req.body };
-            fs.writeFile(jsonPath, JSON.stringify(students, null, 2), () => {
-                res.json({ message: "Updated" });
-            });
-        } else {
-            res.status(404).json({ error: "Not Found" });
-        }
-    });
-});
-
-// ❌ കുട്ടിയെ ഡിലീറ്റ് ചെയ്യാൻ
-app.delete('/api/students/:id', (req, res) => {
-    const jsonPath = path.join(__dirname, 'students.json');
-    fs.readFile(jsonPath, 'utf8', (err, data) => {
-        if (err) return res.status(500).json({ error: "Error" });
-        let students = JSON.parse(data);
-        students = students.filter(s => s.id !== req.params.id);
-        fs.writeFile(jsonPath, JSON.stringify(students, null, 2), () => {
-            res.json({ message: "Deleted" });
-        });
+        fs.writeFile(jsonPath, JSON.stringify(students, null, 2), () => res.json({ message: "Success" }));
     });
 });
 
