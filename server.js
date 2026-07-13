@@ -5,53 +5,43 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
-// static ഫയലുകൾ രണ്ട് ഫോൾഡറുകളിൽ നിന്നും ലോഡ് ചെയ്യാൻ അനുവദിക്കുന്നു
 app.use(express.static(__dirname));
-app.use(express.static(path.join(__dirname, 'public')));
 
-// ഫയലുകൾ എവിടെയാണെങ്കിലും കണ്ടെത്തി അയക്കാനുള്ള ഫങ്ഷൻ
-const sendHtmlFile = (fileName, res) => {
-    let filePath = path.join(__dirname, fileName);
-    // മെയിൻ ഫോൾഡറിൽ ഇല്ലെങ്കിൽ public ഫോൾഡറിൽ നോക്കും
-    if (!fs.existsSync(filePath)) {
-        filePath = path.join(__dirname, 'public', fileName);
-    }
-    
-    if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
-    } else {
-        res.status(404).send(`<h3>Error 404: ${fileName} കണ്ടെത്തിയില്ല!</h3><p>നിങ്ങളുടെ ഫോൾഡറിൽ ഫയലിന്റെ പേര് കൃത്യമാണോ എന്ന് പരിശോധിക്കുക.</p>`);
-    }
-};
-
-// 🌐 റൂട്ടുകൾ
-app.get('/', (req, res) => sendHtmlFile('home.html', res));
-app.get('/home.html', (req, res) => sendHtmlFile('home.html', res));
-app.get('/admin.html', (req, res) => sendHtmlFile('admin.html', res));
-app.get('/judge.html', (req, res) => sendHtmlFile('judge.html', res));
-app.get('/result.html', (req, res) => sendHtmlFile('result.html', res));
-
-// 📋 API
+// വിദ്യാർത്ഥികളുടെ ലിസ്റ്റ് എടുക്കാൻ
 app.get('/api/students', (req, res) => {
-    let jsonPath = path.join(__dirname, 'students.json');
-    if (!fs.existsSync(jsonPath)) jsonPath = path.join(__dirname, 'public', 'students.json');
-    
-    fs.readFile(jsonPath, 'utf8', (err, data) => {
-        if (err) return res.json([]);
-        res.json(JSON.parse(data));
+    fs.readFile(path.join(__dirname, 'students.json'), 'utf8', (err, data) => {
+        if (err) return res.status(500).send("Error reading file");
+        res.json(JSON.parse(data || '[]'));
     });
 });
 
-app.post('/api/students', (req, res) => {
-    let jsonPath = path.join(__dirname, 'students.json');
-    if (!fs.existsSync(jsonPath)) jsonPath = path.join(__dirname, 'public', 'students.json');
-    
-    fs.readFile(jsonPath, 'utf8', (err, data) => {
-        let students = err ? [] : JSON.parse(data);
-        students.push(req.body);
-        fs.writeFile(jsonPath, JSON.stringify(students, null, 2), () => res.json({ message: "Success" }));
+// കുട്ടിയുടെ ഗ്രൂപ്പും മത്സരങ്ങളും ഒരേസമയം അപ്‌ഡേറ്റ് ചെയ്യാനുള്ള പുതിയ API
+app.post('/api/register-event', (req, res) => {
+    const { id, team, gender, category, events } = req.body;
+
+    fs.readFile(path.join(__dirname, 'students.json'), 'utf8', (err, data) => {
+        if (err) return res.status(500).send("Error reading file");
+        
+        let students = JSON.parse(data || '[]');
+        let studentIndex = students.findIndex(s => s.id === id || s.id === Number(id).toString());
+
+        if (studentIndex !== -1) {
+            // കുട്ടിയുടെ ഗ്രൂപ്പ്, ജെൻഡർ, കാറ്റഗറി, മത്സരങ്ങൾ എന്നിവ ഇവിടെ അപ്‌ഡേറ്റ് ചെയ്യുന്നു
+            students[studentIndex].team = team;
+            students[studentIndex].gender = gender;
+            students[studentIndex].category = category;
+            students[studentIndex].events = events; // മത്സരങ്ങളുടെ ലിസ്റ്റ് അറേ ആയി സേവ് ചെയ്യുന്നു
+
+            fs.writeFile(path.join(__dirname, 'students.json'), JSON.stringify(students, null, 4), (err) => {
+                if (err) return res.status(500).send("Error saving data");
+                res.json({ success: true, message: "വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു!" });
+            });
+        } else {
+            res.status(444).json({ success: false, message: "കുട്ടിയെ കണ്ടെത്താനായില്ല!" });
+        }
     });
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});

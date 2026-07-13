@@ -14,7 +14,7 @@
         
         /* ഗ്രൂപ്പുകളുടെ സ്റ്റൈൽ */
         .group-selection { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
-        .group-btn { padding: 12px 25px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; color: white; }
+        .group-btn { padding: 12px 25px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; color: white; width: 30%; min-width: 100px; }
         .btn-badhr { background-color: #28a745; }
         .btn-uhadh { background-color: #dc3545; }
         .btn-hunayn { background-color: #ffc107; color: #333; }
@@ -99,13 +99,12 @@
                 <div id="events-checkbox-list" class="events-checkbox-container"></div>
             </div>
 
-            <button type="button" class="submit-btn" onclick="submitEvent()">മത്സരങ്ങൾ ആഡ് ചെയ്യുക</button>
+            <button type="button" class="submit-btn" onclick="submitEvent()">ഗ്രൂപ്പും മത്സരവും സേവ് ചെയ്യുക</button>
         </form>
     </div>
 </div>
 
 <script>
-    // 📋 മത്സരങ്ങളുടെ വിവരങ്ങൾ
     const eventData = {
         "കിഡ്സ്": ["കേട്ടെഴുത്ത്", "കളറിംഗ്", "കസേരക്കളി", "മെമ്മറി ടെസ്റ്റ്"],
         "സബ് ജൂനിയർ": ["വായന അറബി മലയാളം", "കയ്യെഴുത്ത്", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "ചിത്ര രചന", "ക്വിസ്"],
@@ -115,24 +114,22 @@
 
     let currentSelectedGroup = "";
 
-    // 1. ഗ്രൂപ്പ് ഞെക്കുമ്പോൾ ഫോം തുറക്കാൻ
     function selectMadrasaGroup(groupName, btn) {
         currentSelectedGroup = groupName;
         
         document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        document.getElementById('selected-group-text').textContent = groupName + " Team";
+        document.getElementById('selected-group-text').textContent = `${groupName} ടീമിലേക്ക് ചേർക്കുക`;
         document.getElementById('form-container').style.display = "block";
         
-        // റീസെറ്റ് ചെയ്യുക
         document.getElementById('add-event-form').reset();
         document.getElementById('status-message').innerHTML = '';
         document.getElementById('checkbox-label').style.display = "none";
         document.getElementById('events-checkbox-list').style.display = "none";
     }
 
-    // 2. ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ ആ ഗ്രൂപ്പിലുള്ള കുട്ടിയുടെ പേര് മാത്രം തനിയെ വരാൻ
+    // ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ സിസ്റ്റത്തിലുള്ള ഏത് കുട്ടിയെയും കണ്ടെത്തുന്നു
     async function fetchStudentNameOnly() {
         const idInput = document.getElementById('student-id').value.trim();
         const nameInput = document.getElementById('student-name');
@@ -146,26 +143,20 @@
         try {
             const res = await fetch('/api/students');
             const students = await res.json();
-            
-            // ചെസ്സ് നമ്പറും നമ്മൾ തിരഞ്ഞെടുത്ത ഗ്രൂപ്പും ഒരുമിച്ച് മാച്ച് ചെയ്യുന്ന കുട്ടിയെ ഫിൽറ്റർ ചെയ്യും
-            const student = students.find(s => 
-                (s.id === idInput || s.id === Number(idInput).toString()) && 
-                (s.team === currentSelectedGroup)
-            );
+            const student = students.find(s => s.id === idInput || s.id === Number(idInput).toString());
 
             if (student) {
                 nameInput.value = student.name || '';
-                statusMsg.innerHTML = `<span class="info-msg">✓ കുട്ടിയെ കണ്ടെത്തി! (${currentSelectedGroup} Team)</span>`;
+                statusMsg.innerHTML = `<span class="info-msg">✓ കുട്ടിയെ കണ്ടെത്തി: ${student.name}</span>`;
             } else {
                 nameInput.value = '';
-                statusMsg.innerHTML = `<span class="error-msg">❌ ഈ ഗ്രൂപ്പിൽ (${currentSelectedGroup}) ഈ ചെസ്സ് നമ്പറുള്ള കുട്ടിയെ കണ്ടെത്തിയില്ല!</span>`;
+                statusMsg.innerHTML = `<span class="error-msg">❌ ഈ ചെസ്സ് നമ്പറിൽ കുട്ടിയെ കണ്ടെത്തിയില്ല!</span>`;
             }
         } catch (error) {
             console.error(error);
         }
     }
 
-    // 3. കാറ്റഗറി സെലക്ട് ചെയ്യുമ്പോൾ മത്സരങ്ങൾ ഒന്നിലധികം തിരഞ്ഞെടുക്കാവുന്ന ചെക്ക്ബോക്സ് ലിസ്റ്റ് കാണിക്കാൻ
     function showCategoryEvents() {
         const category = document.getElementById('student-category').value;
         const checkboxContainer = document.getElementById('events-checkbox-list');
@@ -197,14 +188,13 @@
         }
     }
 
-    // ഫോം സബ്മിറ്റ് ചെയ്യുമ്പോൾ
-    function submitEvent() {
+    // സബ്മിറ്റ് ചെയ്യുമ്പോൾ ഗ്രൂപ്പ് വിവരങ്ങളടക്കം ബാക്കെൻഡിലേക്ക് അയക്കുന്നു
+    async function submitEvent() {
         const id = document.getElementById('student-id').value;
         const name = document.getElementById('student-name').value;
         const gender = document.getElementById('student-gender').value;
         const category = document.getElementById('student-category').value;
         
-        // സെലക്ട് ചെയ്ത മത്സരങ്ങൾ കണ്ടെത്തുന്നു
         const selectedCheckboxes = document.querySelectorAll('input[name="student-events"]:checked');
         const selectedEvents = Array.from(selectedCheckboxes).map(cb => cb.value);
 
@@ -218,13 +208,40 @@
             return;
         }
 
-        alert(`${name} എന്ന കുട്ടിക്ക് (${category} - ${gender}) താഴെ പറയുന്ന മത്സരങ്ങൾ വിജയകരമായി ചേർത്തു:\n\n${selectedEvents.join(", ")}`);
-        
-        // ഫോം റീസെറ്റ് ചെയ്യുക
-        document.getElementById('add-event-form').reset();
-        document.getElementById('status-message').innerHTML = '';
-        document.getElementById('checkbox-label').style.display = "none";
-        document.getElementById('events-checkbox-list').style.display = "none";
+        const payload = {
+            id: id,
+            team: currentSelectedGroup, // മുകളിൽ സെലക്ട് ചെയ്ത ഗ്രൂപ്പ് ഇവിടെയാണ് സേവ് ചെയ്യുന്നത്
+            gender: gender,
+            category: category,
+            events: selectedEvents
+        };
+
+        try {
+            const response = await fetch('/api/register-event', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(`വിജയകരം!\n\n${name} എന്ന കുട്ടിയെ "${currentSelectedGroup}" ഗ്രൂപ്പിൽ ഉൾപ്പെടുത്തുകയും താഴെ പറയുന്ന മത്സരങ്ങൾ ആഡ് ചെയ്യുകയും ചെയ്തു:\n\n${selectedEvents.join(", ")}`);
+                
+                // റീസെറ്റ് ചെയ്യൽ
+                document.getElementById('add-event-form').reset();
+                document.getElementById('status-message').innerHTML = '';
+                document.getElementById('checkbox-label').style.display = "none";
+                document.getElementById('events-checkbox-list').style.display = "none";
+                document.getElementById('form-container').style.display = "none";
+                document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("സേവ് ചെയ്യാൻ സാധിച്ചില്ല. നെറ്റ്‌വർക്ക് പരിശോധിക്കുക.");
+        }
     }
 </script>
 </body>
