@@ -4,6 +4,7 @@ const path = require('path');
 const app = express();
 
 app.use(express.json());
+// HTML, CSS, JS ഫയലുകൾ തനിയെ ലോഡ് ആകാൻ ഇത് മാത്രം മതി
 app.use(express.static(path.join(__dirname)));
 
 // കുട്ടികളുടെ ലിസ്റ്റ് എടുക്കാൻ
@@ -29,9 +30,6 @@ app.delete('/api/students/:id', (req, res) => {
     res.json({ message: "Student Deleted Successfully" });
 });
 
-// Node.js v26-ന് ഏറ്റവും അനുയോജ്യമായ വൈൽഡ്കാർഡ് റൂട്ട് രീതി:
-app.get('/:splat*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'home.html'));
-});
+// എറർ ഉണ്ടാക്കിയ വൈൽഡ്കാർഡ് റൂട്ട് ഇവിടെ നിന്നും പൂർണ്ണമായി ഒഴിവാക്കി.
 
 app.listen(3000, () => console.log("Server running on port 3000"));
