@@ -24,13 +24,21 @@ app.get('/api/db-students', (req, res) => {
     res.json(getDbStudents());
 });
 
-app.post('/api/add-student', (req, res) => {
-    const { chestNumber, name, item, team } = req.body;
+// ഒന്നിച്ച് ഒന്നിലധികം മത്സരങ്ങൾ രജിസ്റ്റർ ചെയ്യാനുള്ള പുതിയ API
+app.post('/api/add-students-bulk', (req, res) => {
+    const { chestNumber, name, items, team } = req.body;
     let students = getRegisteredStudents();
     
-    students.push({ chestNumber, name, item, team, place: "", grade: "", mark: 0 });
-    fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));
+    // ലഭിച്ച ഓരോ മത്സരത്തെയും ഓരോ പുതിയ എൻട്രി ആയി പുഷ് ചെയ്യുന്നു
+    items.forEach(item => {
+        // ഒരേ കുട്ടി ഒരേ മത്സരത്തിന് ഡ്യൂപ്ലിക്കേറ്റ് വരുന്നത് തടയാൻ
+        const isDuplicate = students.some(s => s.chestNumber === chestNumber && s.item === item);
+        if(!isDuplicate) {
+            students.push({ chestNumber, name, item, team, place: "", grade: "", mark: 0 });
+        }
+    });
     
+    fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));
     res.json({ success: true });
 });
 
@@ -42,14 +50,12 @@ app.get('/api/results', (req, res) => {
     res.json(getRegisteredStudents());
 });
 
-// ജഡ്ജിമാരുടെ കറക്റ്റ് ആയ മത്സരഫലങ്ങൾ അപ്ഡേറ്റ് ചെയ്യുന്ന API
 app.post('/api/submit-judgement', (req, res) => {
     const { chestNumber, item, place, grade } = req.body;
     let students = getRegisteredStudents();
     
     let found = false;
     students = students.map(s => {
-        // ചെസ്റ്റ് നമ്പറും മത്സരയിനവും ഒരുമിച്ച് ഒത്തുനോക്കുന്നു
         if (s.chestNumber === chestNumber && s.item === item) {
             s.place = place || "";
             s.grade = grade || "";
