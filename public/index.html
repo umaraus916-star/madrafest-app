@@ -43,17 +43,12 @@
         @keyframes popup { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .close-btn { position: absolute; top: -40px; right: 0; font-size: 30px; color: white; cursor: pointer; font-weight: bold; }
 
-        /* വ്യത്യസ്ത പോസ്റ്റർ സ്റ്റൈലുകൾ (കലാമേള തീം) */
+        /* വ്യത്യസ്ത പോസ്റ്റർ സ്റ്റൈലുകൾ */
         .poster { width: 100%; padding: 35px 25px; border-radius: 15px; box-sizing: border-box; color: white; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
-        
-        /* പശ്ചാത്തലത്തിലെ ആർട്സ് ഡിസൈൻ എലമെന്റുകൾ */
         .poster::before { content: "🎨 🏆 🎵 ✨"; position: absolute; font-size: 60px; opacity: 0.08; top: 10%; left: 5%; width: 90%; word-wrap: break-word; line-height: 80px; pointer-events: none; }
 
-        /* 🥇 ഒന്നാം സ്ഥാനത്തിന്റെ പോസ്റ്റർ (Gold/Royal Theme) */
         .poster-style-1 { background: linear-gradient(135deg, #f1c40f, #f39c12, #d35400); border: 5px solid #fff; }
-        /* 🥈 രണ്ടാം സ്ഥാനത്തിന്റെ പോസ്റ്റർ (Silver/Creative Theme) */
         .poster-style-2 { background: linear-gradient(135deg, #7f8c8d, #34495e, #2c3e50); border: 5px solid #fff; }
-        /* 🥉 മൂന്നാം സ്ഥാനത്തിന്റെ പോസ്റ്റർ (Bronze/Artistic Theme) */
         .poster-style-3 { background: linear-gradient(135deg, #e67e22, #d35400, #c0392b); border: 5px solid #fff; }
 
         .fest-title { font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
@@ -63,6 +58,10 @@
         .winner-details { font-size: 16px; margin-bottom: 20px; font-weight: 500; }
         .winner-team { font-size: 18px; font-weight: bold; background: white; color: #333; display: inline-block; padding: 5px 20px; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .medal-icon { font-size: 65px; margin-bottom: 10px; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); }
+
+        /* 🟢 വാട്സാപ്പ് ഷെയർ ബട്ടൺ സ്റ്റൈൽ */
+        .whatsapp-share-btn { display: block; width: 100%; background-color: #25D366; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 8px; margin-top: 15px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .whatsapp-share-btn:hover { background-color: #128C7E; }
     </style>
 </head>
 <body>
@@ -93,6 +92,7 @@
     <div class="modal-content">
         <span class="close-btn" onclick="closePoster()">&times;</span>
         <div id="posterArea"></div>
+        <div id="shareArea"></div>
     </div>
 </div>
 
@@ -155,7 +155,6 @@
                 if (student.team === 'Hira') totalHira += pts;
                 if (student.team === 'Furqan') totalFurqan += pts;
 
-                // ഓരോ കുട്ടിയുടെയും എൻട്രിയുടെ ഇൻഡെക്സ് വെച്ചാണ് ബട്ടൺ വർക്ക് ചെയ്യുന്നത്
                 const studentIdx = activeList.findIndex(s => s.chestNumber === student.chestNumber && s.item === student.item);
 
                 cardHtml += `<div class="winner-row">
@@ -179,10 +178,10 @@
         document.getElementById('scoreFurqan').innerText = totalFurqan;
     }
 
-    // 🎨 പോസ്റ്റർ നിർമ്മിക്കുന്ന പ്രധാന ഫങ്ക്ഷൻ
     function openPoster(idx) {
         const student = activeList[idx];
         const area = document.getElementById('posterArea');
+        const shareArea = document.getElementById('shareArea');
         
         let posterClass = "poster-style-1";
         let medal = "🥇";
@@ -220,6 +219,16 @@
             </div>
         `;
 
+        // 🟢 വാട്സാപ്പിലേക്ക് അയക്കാനുള്ള മെസ്സേജ് നിർമ്മിക്കുന്നു
+        const currentUrl = window.location.href;
+        const whatsappText = `*🏆 MADRAFEST 2026 RESULT 🏆*%0A%0A🎉 *അഭിനന്ദനങ്ങൾ!* 🎉%0A%0A👤 *പേര്:* ${student.name}%0A🔢 *ചെസ്റ്റ് നമ്പർ:* ${student.chestNumber}%0A🟢 *ഗ്രൂപ്പ്:* TEAM ${student.team.toUpperCase()}%0A🎨 *മത്സരം:* ${student.item}%0A🏅 *നേട്ടം:* ${medal} *${titleText}* ${student.grade ? `(${student.grade} Grade)` : ''}%0A%0A👇 റിസൾട്ട് പോസ്റ്റർ ലൈവായി കാണാൻ താഴെ ലിങ്കിൽ ക്ലിക്ക് ചെയ്യുക:%0A🔗 ${currentUrl}`;
+
+        shareArea.innerHTML = `
+            <a href="https://api.whatsapp.com/send?text=${whatsappText}" target="_blank" class="whatsapp-share-btn">
+                🟢 Share to WhatsApp
+            </a>
+        `;
+
         document.getElementById('posterModal').style.display = 'flex';
     }
 
@@ -228,7 +237,6 @@
     }
 
     loadResults();
-    // ലൈവ് അപ്ഡേറ്റിനായി 10 സെക്കൻഡിൽ ഒരിക്കൽ റിഫ്രഷ് ചെയ്യുന്നു
     setInterval(loadResults, 10000);
 </script>
 
