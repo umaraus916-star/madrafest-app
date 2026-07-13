@@ -15,7 +15,7 @@
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #34495e; }
         input, select { width: 100%; padding: 12px; box-sizing: border-box; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 16px; transition: 0.3s; }
-        input:focus { border-color: #3498db; outline: none; }
+        input:focus, select:focus { border-color: #3498db; outline: none; }
         .readonly-box { background-color: #e2e8f0; font-weight: bold; color: #475569; border-color: #cbd5e1; }
         button { width: 100%; background: #28a745; color: white; padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; margin-top: 10px; }
         button:hover { background: #218838; }
@@ -48,8 +48,39 @@
         </div>
 
         <div class="form-group">
+            <label>വിഭാഗം (Gender):</label>
+            <select id="student-gender">
+                <option value="">തിരഞ്ഞെടുക്കുക</option>
+                <option value="ആൺകുട്ടി">ആൺകുട്ടി (Boys)</option>
+                <option value="പെൺകുട്ടി">പെൺകുട്ടി (Girls)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>വിഭാഗം (Category):</label>
+            <select id="student-category">
+                <option value="">തിരഞ്ഞെടുക്കുക</option>
+                <option value="സബ് ജൂനിയർ">സബ് ജൂനിയർ (Sub Junior)</option>
+                <option value="ജൂനിയർ">ജൂനിയർ (Junior)</option>
+                <option value="സീനിയർ">സീനിയർ (Senior)</option>
+                <option value="ജനറൽ">ജനറൽ (General)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
             <label>മത്സര ഇനം (Event Item):</label>
-            <input type="text" id="event-item" placeholder="ഉദാഹരണത്തിന്: കഥാപ്രസംഗം, മാപ്പിളപ്പാട്ട്">
+            <select id="event-item">
+                <option value="">മത്സരം തിരഞ്ഞെടുക്കുക</option>
+                <option value="ഖിറാഅത്ത്">ഖിറാഅത്ത്</option>
+                <option value="പ്രസംഗം (മലയാളം)">പ്രസംഗം (മലയാളം)</option>
+                <option value="പ്രസംഗം (അറബിക്)">പ്രസംഗം (അറബിക്)</option>
+                <option value="മാപ്പിളപ്പാട്ട്">മാപ്പിളപ്പാട്ട്</option>
+                <option value="കഥാപ്രസംഗം">കഥാപ്രസംഗം</option>
+                <option value="ഉർദു ഗാനം">ഉർദു ഗാനം</option>
+                <option value="ക്വിസ്">ക്വിസ്</option>
+                <option value="രചന">രചന</option>
+                <option value="ഹിഫ്ള്">ഹിഫ്ള്</option>
+            </select>
         </div>
 
         <button type="button" onclick="submitEvent()">മത്സരം ആഡ് ചെയ്യുക</button>
@@ -73,7 +104,6 @@
             const res = await fetch('/api/students');
             const students = await res.json();
 
-            // ചെസ്സ് നമ്പർ കണ്ടെത്തുന്നു (String, Number രണ്ട് രീതിയിലും ചെക്ക് ചെയ്യും)
             const student = students.find(s => s.id === idInput || s.id === Number(idInput).toString());
 
             if (student) {
@@ -84,7 +114,7 @@
                 statusMsg.innerHTML = '<span class="error-msg">❌ ഈ ചെസ്സ് നമ്പറിൽ കുട്ടിയെ കണ്ടെത്തിയില്ല!</span>';
             }
         } catch (error) {
-            console.error("Error:", error);
+            console.error(error);
             statusMsg.innerHTML = '<span class="error-msg">⚠️ ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!</span>';
         }
     }
@@ -93,14 +123,16 @@
     function submitEvent() {
         const id = document.getElementById('student-id').value;
         const name = document.getElementById('student-name').value;
+        const gender = document.getElementById('student-gender').value;
+        const category = document.getElementById('student-category').value;
         const item = document.getElementById('event-item').value;
 
-        if (!id || !name || !item) {
-            alert("എല്ലാ വിവരങ്ങളും കൃത്യമായി പൂരിപ്പിക്കുക!");
+        if (!id || !name || !gender || !category || !item) {
+            alert("ദയവായി എല്ലാ ഓപ്ഷനുകളും കൃത്യമായി തിരഞ്ഞെടുക്കുക!");
             return;
         }
 
-        alert(`${name} എന്ന കുട്ടിക്ക് "${item}" എന്ന മത്സരം വിജയകരമായി ചേർത്തു!`);
+        alert(`${name} (${category} - ${gender}) എന്ന കുട്ടിക്ക് "${item}" എന്ന മത്സരം വിജയകരമായി ചേർത്തു!`);
         document.getElementById('add-event-form').reset();
         document.getElementById('status-message').innerHTML = '';
     }
