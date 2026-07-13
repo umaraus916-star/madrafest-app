@@ -3,65 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MadraFest Pro - Judge Panel</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Judge Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
+        .judge-container { background: white; max-width: 400px; margin: 30px auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); text-align: right; }
+        h2 { color: #2c3e50; text-align: center; }
+        label { font-weight: bold; display: block; margin-top: 15px; color: #555; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; text-align: right; }
+        input[type="text"] { text-align: left; }
+        button { background-color: #e74c3c; color: white; border: none; font-weight: bold; cursor: pointer; text-align: center; margin-top: 15px; }
+        button:hover { background-color: #c0392b; }
+        .student-info { font-weight: bold; margin: 15px 0; color: #2c3e50; font-size: 18px; text-align: center; min-height: 25px; }
+        .msg { font-weight: bold; margin-top: 15px; text-align: center; }
+    </style>
 </head>
-<body class="bg-slate-100 p-4 min-h-screen flex justify-center items-start">
+<body>
 
-    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 flex flex-col gap-4">
-        <div class="border-b border-slate-100 pb-3">
-            <span class="text-xs uppercase tracking-wider text-indigo-600 font-bold block mb-1">Mobile Mark Entry</span>
-            <h1 class="text-2xl font-bold text-slate-800">Enter Student Marks</h1>
-        </div>
+<div class="judge-container">
+    <h2>👨‍⚖️ ജഡ്ജിങ് പാനൽ</h2>
+    
+    <label>ചെസ്റ്റ് നമ്പർ:</label>
+    <input type="text" id="chestNumber" placeholder="Chest Number ടൈപ്പ് ചെയ്യുക" oninput="findStudent()">
+    
+    <div id="studentDisplay" class="student-info"></div>
+    
+    <label>സ്ഥാനം (Place - ഓപ്ഷണൽ):</label>
+    <select id="place">
+        <option value="">സ്ഥാനമില്ല (None)</option>
+        <option value="1">First Place (ഒന്നാം സ്ഥാനം)</option>
+        <option value="2">Second Place (രണ്ടാം സ്ഥാനം)</option>
+        <option value="3">Third Place (മൂന്നാം സ്ഥാനം)</option>
+    </select>
 
-        <form id="markForm" class="flex flex-col gap-4">
-            <div>
-                <label class="text-sm font-semibold text-slate-600 block mb-1">ചെസ്റ്റ് നമ്പർ (Chest Number)</label>
-                <input type="text" id="chestNumber" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 font-bold focus:outline-none focus:border-indigo-500">
-            </div>
+    <label>ഗ്രേഡ് (Grade):</label>
+    <select id="grade">
+        <option value="">ഗ്രേഡില്ല (None)</option>
+        <option value="A+">A+ Grade</option>
+        <option value="A">A Grade</option>
+        <option value="B">B Grade</option>
+        <option value="C">C Grade</option>
+    </select>
+    
+    <button onclick="submitJudgement()">Submit Result</button>
+    <div id="msg" class="msg"></div>
+</div>
 
-            <div>
-                <label class="text-sm font-semibold text-slate-600 block mb-1">മാർക്ക് (Mark - Out of 50)</label>
-                <input type="number" id="mark" max="50" min="0" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-indigo-600 font-black text-xl focus:outline-none focus:border-indigo-500">
-            </div>
+<script>
+    let allStudents = [];
 
-            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-md mt-2">
-                Save Marks
-            </button>
-        </form>
+    async function fetchStudents() {
+        const response = await fetch('/api/results-all');
+        if(response.ok) {
+            allStudents = await response.json();
+        }
+    }
+    fetchStudents();
+
+    function findStudent() {
+        const chest = document.getElementById('chestNumber').value.trim();
+        const display = document.getElementById('studentDisplay');
         
-        <p id="message" class="text-center text-sm font-medium hidden"></p>
-    </div>
+        // അധ്യാപകർ ആഡ് ചെയ്ത ലിസ്റ്റിൽ നിന്നും ഈ ചെസ്റ്റ് നമ്പറുള്ള എല്ലാ എൻട്രികളും കണ്ടെത്തുക
+        const matches = allStudents.filter(s => s.chestNumber === chest);
+        if (matches.length > 0) {
+            // കുട്ടിയുടെ പേരും അവൻ പങ്കെടുക്കുന്ന മത്സരങ്ങളും കാണിക്കുക
+            const items = matches.map(m => m.item).join(', ');
+            display.innerHTML = `കുട്ടി: <strong>${matches[0].name}</strong><br><span style="font-size:13px; color:#7f8c8d;">(${items})</span>`;
+        } else {
+            display.innerText = chest ? "കുട്ടിയെ കണ്ടെത്തിയില്ല!" : "";
+        }
+    }
 
-    <script>
-        document.getElementById('markForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const chestNumber = document.getElementById('chestNumber').value;
-            const mark = parseInt(document.getElementById('mark').value);
-            const messageEl = document.getElementById('message');
+    async function submitJudgement() {
+        const chestNumber = document.getElementById('chestNumber').value.trim();
+        const place = document.getElementById('place').value;
+        const grade = document.getElementById('grade').value;
+        const msg = document.getElementById('msg');
 
-            try {
-                const response = await fetch('/api/submit-mark', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chestNumber, mark })
-                });
-                
-                const result = await response.json();
-                
-                if(response.ok) {
-                    messageEl.textContent = "✅ മാർക്ക് വിജയകരമായി രേഖപ്പെടുത്തി!";
-                    messageEl.className = "text-center text-sm font-medium text-green-600 block";
-                    document.getElementById('markForm').reset();
-                } else {
-                    messageEl.textContent = "❌ " + result.error;
-                    messageEl.className = "text-center text-sm font-medium text-red-600 block";
-                }
-            } catch (error) {
-                messageEl.textContent = "❌ സെർവർ എറർ!";
-                messageEl.className = "text-center text-sm font-medium text-red-600 block";
-            }
+        if(!chestNumber) {
+            alert("ദയവായി ചെസ്റ്റ് നമ്പർ നൽകുക!");
+            return;
+        }
+
+        msg.innerText = "Saving...";
+        msg.style.color = "blue";
+
+        const response = await fetch('/api/submit-judgement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chestNumber, place, grade })
         });
-    </script>
+
+        const result = await response.json();
+        if (result.success) {
+            msg.innerText = "വിവരങ്ങൾ വിജയകരമായി ചേർത്തു! ✅";
+            msg.style.color = "green";
+            document.getElementById('chestNumber').value = '';
+            document.getElementById('place').value = '';
+            document.getElementById('grade').value = '';
+            document.getElementById('studentDisplay').innerText = '';
+            fetchStudents(); // ലിസ്റ്റ് പുതുക്കുന്നു
+        } else {
+            msg.innerText = "Error: " + result.error;
+            msg.style.color = "red";
+        }
+    }
+</script>
+
 </body>
 </html>

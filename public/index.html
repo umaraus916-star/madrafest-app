@@ -5,34 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Madrafest Live Results</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; direction: ltr; }
-        .container { background: white; max-width: 700px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
+        .container { background: white; max-width: 750px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
         h1 { color: #2c3e50; margin-bottom: 25px; }
         
-        /* ഗ്രൂപ്പ് പോയിന്റ് ബോർഡ് സ്റ്റൈൽ */
         .group-board { display: table; width: 100%; margin-bottom: 30px; border: 1px solid #ccc; background: #eef2f3; border-radius: 8px; padding: 10px; }
         .group-col { display: table-cell; width: 33.33%; padding: 10px; text-align: center; font-weight: bold; font-size: 18px; }
-        .group-name { color: #34495e; block-size: auto; }
+        .group-name { color: #34495e; }
         .group-score { font-size: 24px; margin-top: 5px; }
         .badr { color: #27ae60; }
         .hira { color: #2980b9; }
         .furqan { color: #e67e22; }
 
-        /* മത്സരങ്ങളുടെ കാർഡുകൾ */
-        .item-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: right; }
+        .item-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .item-title { font-size: 16px; font-weight: bold; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-bottom: 10px; text-align: left; }
         
-        .winner-row { display: table; width: 100%; padding: 6px 0; border-bottom: 1px dashed #eee; font-size: 15px; text-align: left; }
+        .winner-row { display: table; width: 100%; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 15px; text-align: left; }
         .winner-row:last-child { border-bottom: none; }
-        .place { display: table-cell; width: 15%; font-weight: bold; }
-        .name { display: table-cell; width: 45%; color: #333; }
-        .chest { display: table-cell; width: 20%; color: #7f8c8d; text-align: center; }
-        .team { display: table-cell; width: 20%; font-weight: bold; text-align: right; }
+        .place-box { display: table-cell; width: 20%; font-weight: bold; }
+        .name-box { display: table-cell; width: 40%; color: #333; }
+        .chest-box { display: table-cell; width: 15%; color: #7f8c8d; }
+        .grade-box { display: table-cell; width: 13%; font-weight: bold; color: #9b59b6; }
+        .team-box { display: table-cell; width: 12%; font-weight: bold; text-align: right; }
         
-        .first { color: #d4af37; } /* Gold */
-        .second { color: #c0c0c0; } /* Silver */
-        .third { color: #cd7f32; } /* Bronze */
-        
+        .first { color: #d4af37; }
+        .second { color: #c0c0c0; }
+        .third { color: #cd7f32; }
         .no-result { font-style: italic; color: #7f8c8d; padding: 20px; }
     </style>
 </head>
@@ -65,10 +63,9 @@
         const response = await fetch('/api/results');
         const students = await response.json();
         
-        // മാർക്ക് പൂജ്യത്തേക്കാൾ കൂടുതലുള്ള കുട്ടികളെ മാത്രം എടുക്കുക
-        const activeStudents = students.filter(s => s.mark > 0);
+        // സ്ഥാനമോ ഗ്രേഡോ ലഭിച്ച കുട്ടികളെ മാത്രം ഫിൽട്ടർ ചെയ്യുക
+        const activeStudents = students.filter(s => s.place || s.grade);
 
-        // മത്സരയിനം (Item) തിരിച്ച് കുട്ടികളെ ഗ്രൂപ്പ് ചെയ്യുക
         const itemsMap = {};
         activeStudents.forEach(student => {
             if (!itemsMap[student.item]) {
@@ -77,53 +74,55 @@
             itemsMap[student.item].push(student);
         });
 
-        let totalBadr = 0;
-        let totalHira = 0;
-        let totalFurqan = 0;
-
+        let totalBadr = 0; let totalHira = 0; let totalFurqan = 0;
         const container = document.getElementById('winnersContainer');
         container.innerHTML = '';
 
         const itemNames = Object.keys(itemsMap);
         if (itemNames.length === 0) {
             document.getElementById('noResultMsg').style.display = 'block';
-            document.getElementById('scoreBadr').innerText = '0';
-            document.getElementById('scoreHira').innerText = '0';
-            document.getElementById('scoreFurqan').innerText = '0';
             return;
         } else {
             document.getElementById('noResultMsg').style.display = 'none';
         }
 
-        // ഓരോ മത്സരയിനത്തിലെയും വിജയികളെ കണ്ടെത്തുക
         itemNames.forEach(itemName => {
             const list = itemsMap[itemName];
-            // മാർക്കിന്റെ അടിസ്ഥാനത്തിൽ വലിയ മാർക്കിൽ നിന്ന് ചെറിയ മാർക്കിലേക്ക് സോർട്ട് ചെയ്യുന്നു
-            list.sort((a, b) => b.mark - a.mark);
-
-            // ഫസ്റ്റ്, സെക്കൻഡ്, തേർഡ് സ്ഥാനക്കാരെ കണ്ടെത്തുന്നു
-            const winners = [];
-            if (list[0]) winners.push({ place: '1st Place', icon: '🥇', class: 'first', data: list[0], points: 5 });
-            if (list[1]) winners.push({ place: '2nd Place', icon: '🥈', class: 'second', data: list[1], points: 3 });
-            if (list[2]) winners.push({ place: '3rd Place', icon: '🥉', class: 'third', data: list[2], points: 1 });
-
-            // ഗ്രൂപ്പ് പോയിന്റ് കൂട്ടുന്നു
-            winners.forEach(w => {
-                if (w.data.team === 'Badr') totalBadr += w.points;
-                if (w.data.team === 'Hira') totalHira += w.points;
-                if (w.data.team === 'Furqan') totalFurqan += w.points;
+            
+            // സ്ഥാനത്തിന്റെ അടിസ്ഥാനത്തിൽ ആദ്യം ക്രമീകരിക്കുന്നു (1st, 2nd, 3rd)
+            list.sort((a, b) => {
+                const pA = a.place ? parseInt(a.place) : 99;
+                const pB = b.place ? parseInt(b.place) : 99;
+                return pA - pB;
             });
 
-            // HTML കാർഡ് നിർമ്മിക്കുന്നു
-            let cardHtml = `<div class="item-card">
-                <div class="item-title">${itemName}</div>`;
+            let cardHtml = `<div class="item-card"><div class="item-title">${itemName}</div>`;
             
-            winners.forEach(w => {
+            list.forEach(student => {
+                let placeText = "None";
+                let icon = "• ";
+                let pClass = "";
+                let pts = 0;
+
+                if(student.place === "1") { placeText = "1st Place"; icon = "🥇 "; pClass = "first"; pts += 5; }
+                else if(student.place === "2") { placeText = "2nd Place"; icon = "🥈 "; pClass = "second"; pts += 3; }
+                else if(student.place === "3") { placeText = "3rd Place"; icon = "🥉 "; pClass = "third"; pts += 1; }
+
+                // ഗ്രേഡ് അടിസ്ഥാനമാക്കിയുള്ള പോയിന്റുകൾ (വേണമെങ്കിൽ കൂട്ടാം)
+                if(student.grade === "A+") pts += 5;
+                else if(student.grade === "A") pts += 3;
+                else if(student.grade === "B") pts += 1;
+
+                if (student.team === 'Badr') totalBadr += pts;
+                if (student.team === 'Hira') totalHira += pts;
+                if (student.team === 'Furqan') totalFurqan += pts;
+
                 cardHtml += `<div class="winner-row">
-                    <span class="place ${w.class}">${w.icon} ${w.place}</span>
-                    <span class="name">${w.data.name}</span>
-                    <span class="chest">Chest: ${w.data.chestNumber}</span>
-                    <span class="team ${w.data.team.toLowerCase()}">${w.data.team}</span>
+                    <span class="place-box ${pClass}">${icon}${placeText}</span>
+                    <span class="name-box">${student.name}</span>
+                    <span class="chest-box">Chest: ${student.chestNumber}</span>
+                    <span class="grade-box">${student.grade ? student.grade + ' Grade' : '-'}</span>
+                    <span class="team-box ${student.team.toLowerCase()}">${student.team}</span>
                 </div>`;
             });
 
@@ -131,13 +130,11 @@
             container.innerHTML += cardHtml;
         });
 
-        // ഗ്രൂപ്പ് മാർക്കുകൾ സ്ക്രീനിൽ കാണിക്കുന്നു
         document.getElementById('scoreBadr').innerText = totalBadr;
         document.getElementById('scoreHira').innerText = totalHira;
         document.getElementById('scoreFurqan').innerText = totalFurqan;
     }
 
-    // ആദ്യ തവണ ലോഡ് ചെയ്യാനും പിന്നീട് 5 സെക്കൻഡ് കൂടുമ്പോൾ റിഫ്രഷ് ചെയ്യാനും
     loadResults();
     setInterval(loadResults, 5000);
 </script>

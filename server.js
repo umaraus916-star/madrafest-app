@@ -28,24 +28,30 @@ app.post('/api/add-student', (req, res) => {
     const { chestNumber, name, item, team } = req.body;
     let students = getRegisteredStudents();
     
-    students.push({ chestNumber, name, item, team, mark: 0 });
+    students.push({ chestNumber, name, item, team, place: "", grade: "", mark: 0 });
     fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));
     
     res.json({ success: true });
+});
+
+app.get('/api/results-all', (req, res) => {
+    res.json(getRegisteredStudents());
 });
 
 app.get('/api/results', (req, res) => {
     res.json(getRegisteredStudents());
 });
 
-app.post('/api/submit-mark', (req, res) => {
-    const { chestNumber, mark } = req.body;
+// ജഡ്ജിമാരുടെ പുതിയ റിസൾട്ട് സബ്മിഷൻ API
+app.post('/api/submit-judgement', (req, res) => {
+    const { chestNumber, place, grade } = req.body;
     let students = getRegisteredStudents();
     
     let found = false;
     students = students.map(s => {
         if (s.chestNumber === chestNumber) {
-            s.mark = parseInt(mark);
+            s.place = place || "";
+            s.grade = grade || "";
             found = true;
         }
         return s;
@@ -54,34 +60,6 @@ app.post('/api/submit-mark', (req, res) => {
     if (!found) {
         return res.status(404).json({ success: false, error: "ഈ കുട്ടി മത്സരത്തിൽ രജിസ്റ്റർ ചെയ്തിട്ടില്ല!" });
     }
-
-    fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));
-    res.json({ success: true });
-});
-
-// API: വിവരങ്ങൾ എഡിറ്റ് ചെയ്യാൻ (Edit)
-app.post('/api/edit-student', (req, res) => {
-    const { chestNumber, item, team, mark } = req.body;
-    let students = getRegisteredStudents();
-
-    students = students.map(s => {
-        if (s.chestNumber === chestNumber && s.item === item) {
-            s.team = team;
-            s.mark = parseInt(mark) || 0;
-        }
-        return s;
-    });
-
-    fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));
-    res.json({ success: true });
-});
-
-// API: വിവരങ്ങൾ ഡിലീറ്റ് ചെയ്യാൻ (Delete)
-app.post('/api/delete-student', (req, res) => {
-    const { chestNumber, item } = req.body;
-    let students = getRegisteredStudents();
-
-    students = students.filter(s => !(s.chestNumber === chestNumber && s.item === item));
 
     fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));
     res.json({ success: true });
