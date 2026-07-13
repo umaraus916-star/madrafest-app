@@ -60,6 +60,7 @@
             <label>വിഭാഗം (Category):</label>
             <select id="student-category">
                 <option value="">തിരഞ്ഞെടുക്കുക</option>
+                <option value="കിഡ്സ്">കിഡ്സ് (Kids)</option>
                 <option value="സബ് ജൂനിയർ">സബ് ജൂനിയർ (Sub Junior)</option>
                 <option value="ജൂനിയർ">ജൂനിയർ (Junior)</option>
                 <option value="സീനിയർ">സീനിയർ (Senior)</option>
@@ -88,22 +89,16 @@
 </div>
 
 <script>
-    // 🔍 ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേര് കണ്ടെത്താനുള്ള ഫങ്ഷൻ
     async function fetchStudentNameForAdd() {
         const idInput = document.getElementById('student-id').value.trim();
         const nameInput = document.getElementById('student-name');
         const statusMsg = document.getElementById('status-message');
 
-        if (!idInput) {
-            nameInput.value = '';
-            statusMsg.innerHTML = '';
-            return;
-        }
+        if (!idInput) { nameInput.value = ''; statusMsg.innerHTML = ''; return; }
 
         try {
             const res = await fetch('/api/students');
             const students = await res.json();
-
             const student = students.find(s => s.id === idInput || s.id === Number(idInput).toString());
 
             if (student) {
@@ -115,11 +110,9 @@
             }
         } catch (error) {
             console.error(error);
-            statusMsg.innerHTML = '<span class="error-msg">⚠️ ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!</span>';
         }
     }
 
-    // സബ്മിറ്റ് ചെയ്യുമ്പോൾ
     function submitEvent() {
         const id = document.getElementById('student-id').value;
         const name = document.getElementById('student-name').value;
@@ -137,6 +130,5 @@
         document.getElementById('status-message').innerHTML = '';
     }
 </script>
-
 </body>
 </html>
