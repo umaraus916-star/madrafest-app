@@ -6,68 +6,104 @@
     <title>Add Student Details</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
-        .form-container { background: white; max-width: 450px; margin: 20px auto; padding: 25px; border-radius: 10px; box-shadow: 0px 0px 15px rgba(0,0,0,0.1); text-align: right; }
-        h2 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
-        label { font-weight: bold; display: block; margin-top: 10px; color: #555; text-align: right; }
+        .main-container { max-width: 500px; margin: auto; }
+        h2 { color: #2c3e50; margin-bottom: 20px; }
+        
+        /* ഗ്രൂപ്പ് സെലക്ഷൻ കാർഡുകൾ */
+        .group-selector { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 10px; }
+        .group-card { flex: 1; padding: 15px 10px; background: white; border: 2px solid #ddd; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: all 0.3s; }
+        .group-card:hover { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
+        
+        /* ആക്റ്റീവ് ഗ്രൂപ്പ് കളറുകൾ */
+        .group-card.badr-active { background-color: #2ecc71; color: white; border-color: #27ae60; }
+        .group-card.hira-active { background-color: #3498db; color: white; border-color: #2980b9; }
+        .group-card.furqan-active { background-color: #e67e22; color: white; border-color: #d35400; }
+        
+        .group-icon { font-size: 30px; display: block; margin-bottom: 5px; }
+
+        /* ഫോം കണ്ടെയ്നർ (ആദ്യം മറച്ചു വെക്കും) */
+        .form-container { display: none; background: white; padding: 25px; border-radius: 10px; box-shadow: 0px 0px 15px rgba(0,0,0,0.1); text-align: right; }
+        
+        label { font-weight: bold; display: block; margin-top: 15px; color: #555; }
         input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; text-align: right; }
         input { text-align: left; }
         #chestNumber { text-align: left; }
         #name { background-color: #eee; cursor: not-allowed; text-align: left; }
-        button { background-color: #2ecc71; color: white; border: none; font-weight: bold; cursor: pointer; text-align: center; margin-top: 15px; }
-        button:hover { background-color: #27ae60; }
+        
+        .submit-btn { border: none; font-weight: bold; cursor: pointer; text-align: center; margin-top: 20px; color: white; }
+        .btn-badr { background-color: #2ecc71; }
+        .btn-hira { background-color: #3498db; }
+        .btn-furqan { background-color: #e67e22; }
+        
         .msg { font-weight: bold; margin-top: 15px; text-align: center; }
+        .selected-banner { text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 15px; padding: 8px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div class="form-container">
+<div class="main-container">
     <h2>കുട്ടികളുടെ വിവരങ്ങൾ ചേർക്കുക</h2>
-    <form id="studentForm">
-        
-        <label>ചെസ്റ്റ് നമ്പർ:</label>
-        <input type="text" id="chestNumber" placeholder="Chest Number അടിക്കുക" oninput="autoFillName()" required>
-        
-        <label>കുട്ടിയുടെ പേര് (തനിയെ വരും):</label>
-        <input type="text" id="name" placeholder="Name" readonly required>
+    
+    <p style="font-weight: bold; color: #7f8c8d;">ആദ്യം താഴെ നിന്ന് കുട്ടിയുടെ ഗ്രൂപ്പ് സെലക്ട് ചെയ്യുക:</p>
+    <div class="group-selector">
+        <div class="group-card" id="cardBadr" onclick="selectGroup('Badr')">
+            <span class="group-icon">🟢</span>
+            BADR
+        </div>
+        <div class="group-card" id="cardHira" onclick="selectGroup('Hira')">
+            <span class="group-icon">🔵</span>
+            HIRA
+        </div>
+        <div class="group-card" id="cardFurqan" onclick="selectGroup('Furqan')">
+            <span class="group-icon">🟠</span>
+            FURQAN
+        </div>
+    </div>
 
-        <label>വിഭാഗം (Category):</label>
-        <select id="category" onchange="updateItems()" required>
-            <option value="">സെലക്ട് ചെയ്യുക</option>
-            <option value="Senior">Senior (സീനിയർ)</option>
-            <option value="Junior">Junior (ജൂനിയർ)</option>
-            <option value="Sub_Junior">Sub Junior (സബ് ജൂനിയർ)</option>
-            <option value="Kids">Kids (കിഡ്സ്)</option>
-        </select>
+    <div class="form-container" id="formBox">
+        <div id="groupBanner" class="selected-banner"></div>
+        
+        <form id="studentForm">
+            <input type="hidden" id="selectedTeam">
+            
+            <label>ചെസ്റ്റ് നമ്പർ:</label>
+            <input type="text" id="chestNumber" placeholder="Chest Number അടിക്കുക" oninput="autoFillName()" required>
+            
+            <label>കുട്ടിയുടെ പേര് (തനിയെ വരും):</label>
+            <input type="text" id="name" placeholder="Name" readonly required>
 
-        <label>വിഭാഗം (Gender):</label>
-        <select id="gender" required>
-            <option value="">സെലക്ട് ചെയ്യുക</option>
-            <option value="Boys">Boys (ആൺകുട്ടികൾ)</option>
-            <option value="Girls">Girls (പെൺകുട്ടികൾ)</option>
-        </select>
-        
-        <label>മത്സരയിനം (Item):</label>
-        <select id="item" required>
-            <option value="">ആദ്യം വിഭാഗം സെലക്ട് ചെയ്യുക</option>
-        </select>
-        
-        <label>ടീം (Team):</label>
-        <select id="team" required>
-            <option value="">സെലക്ട് ചെയ്യുക</option>
-            <option value="Badr">Badr</option>
-            <option value="Hira">Hira</option>
-            <option value="Furqan">Furqan</option>
-        </select>
-        
-        <button type="submit">Submit Details</button>
-    </form>
-    <div id="message" class="msg"></div>
+            <label>വിഭാഗം (Category):</label>
+            <select id="category" onchange="updateItems()" required>
+                <option value="">സെലക്ട് ചെയ്യുക</option>
+                <option value="Senior">Senior (സീനിയർ)</option>
+                <option value="Junior">Junior (ജൂനിയർ)</option>
+                <option value="Sub_Junior">Sub Junior (സബ് ജൂനിയർ)</option>
+                <option value="Kids">Kids (കിഡ്സ്)</option>
+            </select>
+
+            <label>വിഭാഗം (Gender):</label>
+            <select id="gender" required>
+                <option value="">സെലക്ട് ചെയ്യുക</option>
+                <option value="Boys">Boys (ആൺകുട്ടികൾ)</option>
+                <option value="Girls">Girls (പെൺകുട്ടികൾ)</option>
+            </select>
+            
+            <label>മത്സരയിനം (Item):</label>
+            <select id="item" required>
+                <option value="">ആദ്യം വിഭാഗം സെലക്ട് ചെയ്യുക</option>
+            </select>
+            
+            <button type="submit" id="subBtn" class="submit-btn">Submit Details</button>
+        </form>
+        <div id="message" class="msg"></div>
+    </div>
 </div>
 
 <script>
     let studentDatabase = [];
+    let currentGroup = '';
 
-    // സെർവറിൽ നിന്ന് 86 കുട്ടികളുടെ ലിസ്റ്റ് ലോഡ് ചെയ്യുന്നു
+    // സെർവറിൽ നിന്ന് 86 കുട്ടികളുടെ മാസ്റ്റർ ലിസ്റ്റ് ലോഡ് ചെയ്യുന്നു
     async function loadDatabase() {
         const response = await fetch('/api/db-students');
         if(response.ok) {
@@ -76,7 +112,50 @@
     }
     loadDatabase();
 
-    // ചെസ്റ്റ് നമ്പർ അടിക്കുമ്പോൾ പേര് തനിയെ പൂരിപ്പിക്കുന്ന ഫങ്ക്ഷൻ
+    // ഗ്രൂപ്പ് ഐക്കണിൽ ഞെക്കുമ്പോൾ ഫോം കാണിക്കുന്ന ഫങ്ക്ഷൻ
+    function selectGroup(groupName) {
+        currentGroup = groupName;
+        document.getElementById('selectedTeam').value = groupName;
+        
+        // എല്ലാ കാർഡുകളുടെയും ആക്റ്റീവ് സ്റ്റൈൽ മാറ്റുന്നു
+        document.getElementById('cardBadr').className = 'group-card';
+        document.getElementById('cardHira').className = 'group-card';
+        document.getElementById('cardFurqan').className = 'group-card';
+        
+        const formBox = document.getElementById('formBox');
+        const banner = document.getElementById('groupBanner');
+        const subBtn = document.getElementById('subBtn');
+        
+        formBox.style.display = 'block';
+        
+        // സെലക്ട് ചെയ്ത ഗ്രൂപ്പിന് അനുസരിച്ച് കളർ മാറ്റുന്നു
+        if(groupName === 'Badr') {
+            document.getElementById('cardBadr').classList.add('badr-active');
+            banner.innerText = "Selected Group: BADR 🟢";
+            banner.style.backgroundColor = "#e8f8f0";
+            banner.style.color = "#27ae60";
+            subBtn.className = "submit-btn btn-badr";
+        } else if(groupName === 'Hira') {
+            document.getElementById('cardHira').classList.add('hira-active');
+            banner.innerText = "Selected Group: HIRA 🔵";
+            banner.style.backgroundColor = "#eaf2f8";
+            banner.style.color = "#2980b9";
+            subBtn.className = "submit-btn btn-hira";
+        } else if(groupName === 'Furqan') {
+            document.getElementById('cardFurqan').classList.add('furqan-active');
+            banner.innerText = "Selected Group: FURQAN 🟠";
+            banner.style.backgroundColor = "#fdf2e9";
+            banner.style.color = "#e67e22";
+            subBtn.className = "submit-btn btn-furqan";
+        }
+        
+        // ഫോം റീസെറ്റ് ചെയ്യുന്നു (ചെസ്റ്റ് നമ്പറും പേരും പുതിയ ഗ്രൂപ്പിനായി മാറ്റാൻ)
+        document.getElementById('chestNumber').value = '';
+        document.getElementById('name').value = '';
+        document.getElementById('name').style.borderColor = '#ccc';
+    }
+
+    // ചെസ്റ്റ് നമ്പർ അടിക്കുമ്പോൾ പേര് തനിയെ പൂരിപ്പിക്കുന്നു
     function autoFillName() {
         const chest = document.getElementById('chestNumber').value.trim();
         const nameInput = document.getElementById('name');
@@ -101,7 +180,6 @@
     function updateItems() {
         const category = document.getElementById('category').value;
         const itemSelect = document.getElementById('item');
-        
         itemSelect.innerHTML = '<option value="">മത്സരം സെലക്ട് ചെയ്യുക</option>';
         
         if (category && itemsData[category]) {
@@ -122,7 +200,7 @@
         const category = document.getElementById('category').value;
         const gender = document.getElementById('gender').value;
         const item = document.getElementById('item').value;
-        const team = document.getElementById('team').value;
+        const team = document.getElementById('selectedTeam').value;
         const messageDiv = document.getElementById('message');
 
         if(!name) {
@@ -146,8 +224,14 @@
         if (result.success) {
             messageDiv.innerText = "വിജയകരമായി രജിസ്റ്റർ ചെയ്തു! ✅";
             messageDiv.style.color = "green";
+            
+            // ഫോം ബോക്സ് മറക്കുന്നു, ബട്ടണുകളുടെ ആക്റ്റീവ് കളർ മാറ്റുന്നു
             document.getElementById('studentForm').reset();
             document.getElementById('item').innerHTML = '<option value="">ആദ്യം വിഭാഗം സെലക്ട് ചെയ്യുക</option>';
+            document.getElementById('formBox').style.display = 'none';
+            document.getElementById('cardBadr').className = 'group-card';
+            document.getElementById('cardHira').className = 'group-card';
+            document.getElementById('cardFurqan').className = 'group-card';
         } else {
             messageDiv.innerText = "Error: " + result.error;
             messageDiv.style.color = "red";
