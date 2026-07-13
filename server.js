@@ -29,8 +29,8 @@ app.delete('/api/students/:id', (req, res) => {
     res.json({ message: "Student Deleted Successfully" });
 });
 
-// വൈൽഡ്കാർഡ് റൂട്ട് പുതിയ വേർഷന് അനുയോജ്യമായി മാറ്റിയത്:
-app.get('(.*)', (req, res) => {
+// Node.js v26-ന് ഏറ്റവും അനുയോജ്യമായ വൈൽഡ്കാർഡ് റൂട്ട് രീതി:
+app.get('/:splat*', (req, res) => {
     res.sendFile(path.join(__dirname, 'home.html'));
 });
 
