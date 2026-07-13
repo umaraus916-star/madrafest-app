@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madrafest Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; text-align: center; }
+        .header { background: #2c3e50; color: white; padding: 30px; border-radius: 15px; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: auto; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s; }
+        .card:hover { transform: translateY(-10px); }
+        .btn { display: inline-block; margin-top: 15px; padding: 12px 25px; background: #3498db; color: white; text-decoration: none; border-radius: 25px; font-weight: bold; }
+        .icon { font-size: 40px; margin-bottom: 10px; }
+        h2 { color: #34495e; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🎨 MADRAFEST 2026</h1>
+    <p>മദ്രസ ഫെസ്റ്റ് മാനേജ്‌മെന്റ് പോർട്ടൽ</p>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <div class="icon">📝</div>
+        <h2>രജിസ്ട്രേഷൻ</h2>
+        <p>അധ്യാപകർക്ക് മത്സരങ്ങൾ രജിസ്റ്റർ ചെയ്യാം.</p>
+        <a href="add.html" class="btn">Open Form</a>
+    </div>
+
+    <div class="card">
+        <div class="icon">👨‍⚖️</div>
+        <h2>ജഡ്ജിങ് പാനൽ</h2>
+        <p>മത്സര ഫലങ്ങൾ രേഖപ്പെടുത്താൻ.</p>
+        <a href="judge.html" class="btn">Judge Portal</a>
+    </div>
+
+    <div class="card">
+        <div class="icon">📊</div>
+        <h2>ലൈവ് റിസൾട്ട്</h2>
+        <p>തത്സമയ ഫലങ്ങളും പോസ്റ്ററുകളും.</p>
+        <a href="index.html" class="btn">View Results</a>
+    </div>
+
+    <div class="card">
+        <div class="icon">⚙️</div>
+        <h2>അഡ്മിൻ പാനൽ</h2>
+        <p>റിപ്പോർട്ടുകളും ഡാറ്റ മാനേജ്‌മെന്റും.</p>
+        <a href="admin.html" class="btn">Control Panel</a>
+    </div>
+</div>
+
+</body>
+</html>
