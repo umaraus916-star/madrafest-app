@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>മദ്രസ ഫെസ്റ്റ് - മത്സരങ്ങൾ ചേർക്കുക</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f6; }
+        .nav-bar { background: #343a40; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .nav-bar a { color: white; text-decoration: none; font-weight: bold; padding: 6px 15px; background: #007bff; border-radius: 4px; transition: 0.3s; }
+        .nav-bar a:hover { background: #0069d9; }
+        .nav-title { color: white; font-weight: bold; font-size: 18px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0px 8px 20px rgba(0,0,0,0.08); }
+        h2 { color: #2c3e50; text-align: center; margin-top: 0; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #34495e; }
+        input, select { width: 100%; padding: 12px; box-sizing: border-box; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 16px; transition: 0.3s; }
+        input:focus { border-color: #3498db; outline: none; }
+        .readonly-box { background-color: #e2e8f0; font-weight: bold; color: #475569; border-color: #cbd5e1; }
+        button { width: 100%; background: #28a745; color: white; padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #218838; }
+        #status-message { margin-top: 6px; font-size: 14px; font-weight: bold; }
+        .info-msg { color: #28a745; }
+        .error-msg { color: #dc3545; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav-bar">
+        <span class="nav-title">➕ മത്സരങ്ങൾ ചേർക്കുക</span>
+        <a href="/home.html">🏠 Home</a>
+    </div>
+
+    <h2>📝 വിദ്യാർത്ഥികളുടെ മത്സരങ്ങൾ ചേർക്കുക</h2>
+    <hr style="border: 0; height: 1px; background: #eee; margin-bottom: 20px;">
+    
+    <form id="add-event-form">
+        <div class="form-group">
+            <label>Chess No / Reg No (ചെസ്സ് നമ്പർ):</label>
+            <input type="text" id="student-id" placeholder="ഉദാഹരണത്തിന്: 78" oninput="fetchStudentNameForAdd()">
+            <div id="status-message"></div>
+        </div>
+
+        <div class="form-group">
+            <label>വിദ്യാർത്ഥിയുടെ പേര് (Auto-Fill):</label>
+            <input type="text" id="student-name" class="readonly-box" placeholder="ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേര് ഇവിടെ വരും" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>മത്സര ഇനം (Event Item):</label>
+            <input type="text" id="event-item" placeholder="ഉദാഹരണത്തിന്: കഥാപ്രസംഗം, മാപ്പിളപ്പാട്ട്">
+        </div>
+
+        <button type="button" onclick="submitEvent()">മത്സരം ആഡ് ചെയ്യുക</button>
+    </form>
+</div>
+
+<script>
+    // 🔍 ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേര് കണ്ടെത്താനുള്ള ഫങ്ഷൻ
+    async function fetchStudentNameForAdd() {
+        const idInput = document.getElementById('student-id').value.trim();
+        const nameInput = document.getElementById('student-name');
+        const statusMsg = document.getElementById('status-message');
+
+        if (!idInput) {
+            nameInput.value = '';
+            statusMsg.innerHTML = '';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/students');
+            const students = await res.json();
+
+            // ചെസ്സ് നമ്പർ കണ്ടെത്തുന്നു (String, Number രണ്ട് രീതിയിലും ചെക്ക് ചെയ്യും)
+            const student = students.find(s => s.id === idInput || s.id === Number(idInput).toString());
+
+            if (student) {
+                nameInput.value = student.name;
+                statusMsg.innerHTML = `<span class="info-msg">✓ കുട്ടിയെ കണ്ടെത്തി: ${student.team || '-'} Team</span>`;
+            } else {
+                nameInput.value = '';
+                statusMsg.innerHTML = '<span class="error-msg">❌ ഈ ചെസ്സ് നമ്പറിൽ കുട്ടിയെ കണ്ടെത്തിയില്ല!</span>';
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            statusMsg.innerHTML = '<span class="error-msg">⚠️ ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!</span>';
+        }
+    }
+
+    // സബ്മിറ്റ് ചെയ്യുമ്പോൾ
+    function submitEvent() {
+        const id = document.getElementById('student-id').value;
+        const name = document.getElementById('student-name').value;
+        const item = document.getElementById('event-item').value;
+
+        if (!id || !name || !item) {
+            alert("എല്ലാ വിവരങ്ങളും കൃത്യമായി പൂരിപ്പിക്കുക!");
+            return;
+        }
+
+        alert(`${name} എന്ന കുട്ടിക്ക് "${item}" എന്ന മത്സരം വിജയകരമായി ചേർത്തു!`);
+        document.getElementById('add-event-form').reset();
+        document.getElementById('status-message').innerHTML = '';
+    }
+</script>
+
+</body>
+</html>
