@@ -3,166 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control & Reports</title>
+    <title>Madrafest Admin Control Panel (PDF)</title>
+    <!-- PDF ജനറേറ്റ് ചെയ്യാൻ ആവശ്യമായ ലൈബ്രറികൾ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
-        .container { background: white; max-width: 800px; margin: auto; padding: 25px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; }
+        .container { background: white; max-width: 900px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; }
+        .btn-section { margin: 20px 0; padding: 15px; background: #eef2f3; border-radius: 8px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
         
-        /* റിപ്പോർട്ട് സെക്ഷൻ സ്റ്റൈൽ */
-        .report-section { background: #eef2f3; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #ccc; }
-        .report-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 10px; }
-        .download-btn { background-color: #27ae60; color: white; border: none; padding: 10px 15px; font-weight: bold; border-radius: 5px; cursor: pointer; font-size: 14px; }
-        .download-btn:hover { background-color: #219150; }
+        /* 📄 പിഡിഎഫ് ബട്ടണുകളുടെ പുതിയ സ്റ്റൈൽ */
+        .pdf-btn { background-color: #e74c3c; color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; }
+        .pdf-btn:hover { background-color: #c0392b; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 15px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
         th { background-color: #34495e; color: white; }
         tr:nth-child(even) { background-color: #f9f9f9; }
-        .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+        .delete-btn { background-color: #c0392b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .delete-btn:hover { background-color: #962d22; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>⚙️ അഡ്മിൻ കൺട്രോൾ പാനൽ & റിപ്പോർട്ടുകൾ</h2>
+    <h1>⚙️ അഡ്മിൻ കൺട്രോൾ പാനൽ</h1>
+    <p>രജിസ്ട്രേഷൻ വിവരങ്ങൾ നിയന്ത്രിക്കാനും ഔദ്യോഗിക പിഡിഎഫ് റിപ്പോർട്ടുകൾ ഡൗൺലോഡ് ചെയ്യാനും ഇവിടെ സാധിക്കും.</p>
     
-    <div class="report-section">
-        <h3>📊 റിപ്പോർട്ടുകൾ ഡൗൺലോഡ് ചെയ്യുക (Excel/CSV)</h3>
-        <div class="report-grid">
-            <button class="download-btn" onclick="exportCallList()">📞 കോൾ ലിസ്റ്റ് (Call List)</button>
-            <button class="download-btn" onclick="exportValuationSheet()">📝 വാല്യൂവേഷൻ ഷീറ്റ്</button>
-            <button class="download-btn" onclick="exportWinnersList()">🏆 വിജയികളുടെ ലിസ്റ്റ്</button>
-            <button class="download-btn" onclick="exportGroupScores()">📈 ഗ്രൂപ്പ് പോയിന്റ് റിപ്പോർട്ട്</button>
-        </div>
+    <!-- 📄 PDF റിപ്പോർട്ട് ബട്ടണുകൾ മാത്രം -->
+    <div class="btn-section">
+        <button class="pdf-btn" onclick="generatePDF('call_list')">📄 Download Call List (PDF)</button>
+        <button class="pdf-btn" onclick="generatePDF('valuation_sheet')">📄 Download Valuation Sheet (PDF)</button>
+        <button class="pdf-btn" onclick="generatePDF('winners_list')">🏆 Download Winners List (PDF)</button>
     </div>
 
-    <h3>📋 രജിസ്റ്റർ ചെയ്ത മുഴുവൻ വിവരങ്ങളും</h3>
+    <h3>📋 ആകെ രജിസ്റ്റർ ചെയ്ത വിവരങ്ങൾ</h3>
     <table>
         <thead>
             <tr>
                 <th>Chest No</th>
                 <th>Name</th>
-                <th>Item</th>
-                <th>Group</th>
+                <th>Team</th>
+                <th>Event/Item</th>
                 <th>Place</th>
                 <th>Grade</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody id="adminTableBody">
-            </tbody>
+            <!-- വിവരങ്ങൾ ഇവിടെ ലോഡ് ചെയ്യും -->
+        </tbody>
     </table>
 </div>
 
 <script>
-    let allEntries = [];
+    let allData = [];
 
     async function loadAdminData() {
-        const response = await fetch('/api/results-all');
-        if(response.ok) {
-            allEntries = await response.json();
-            const tbody = document.getElementById('adminTableBody');
-            tbody.innerHTML = '';
-            
-            allEntries.forEach((student, index) => {
-                const row = `<tr>
-                    <td>${student.chestNumber}</td>
+        const response = await fetch('/api/results');
+        allData = await response.json();
+        
+        const tbody = document.getElementById('adminTableBody');
+        tbody.innerHTML = '';
+        
+        if(allData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#7f8c8d;">രജിസ്ട്രേഷനുകൾ ഒന്നും തന്നെ ലഭ്യമായിട്ടില്ല!</td></tr>`;
+            return;
+        }
+
+        allData.forEach(student => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${student.chestNumber}</strong></td>
                     <td>${student.name}</td>
-                    <td>${student.item}</td>
                     <td>${student.team}</td>
+                    <td>${student.item}</td>
                     <td>${student.place ? student.place : '-'}</td>
                     <td>${student.grade ? student.grade : '-'}</td>
-                    <td><button class="delete-btn" onclick="deleteEntry(${index})">Delete</button></td>
-                </tr>`;
-                tbody.innerHTML += row;
-            });
-        }
-    }
-
-    // 1. കോൾ ലിസ്റ്റ് എക്സ്പോർട്ട് (Call List)
-    function exportCallList() {
-        let csv = 'Chest Number,Name,Group,Item\n';
-        allEntries.forEach(s => {
-            csv += `"${s.chestNumber}","${s.name}","${s.team}","${s.item}"\n`;
+                    <td>
+                        <button class="delete-btn" onclick="deleteEntry('${student.chestNumber}', '${student.item}')">Delete</button>
+                    </td>
+                </tr>
+            `;
         });
-        downloadCSV(csv, 'Madrafest_Call_List.csv');
     }
 
-    // 2. വാല്യൂവേഷൻ ഷീറ്റ് എക്സ്പോർട്ട് (Valuation Sheet - കുട്ടികളുടെ പേര് ഉണ്ടാകില്ല)
-    function exportValuationSheet() {
-        let csv = 'Item,Chest Number,Place (1st/2nd/3rd),Grade (A+/A/B),Signature\n';
-        // മത്സരയിനത്തിന്റെ അടിസ്ഥാനത്തിൽ സോർട്ട് ചെയ്യുന്നു
-        const sorted = [...allEntries].sort((a,b) => a.item.localeCompare(b.item));
-        sorted.forEach(s => {
-            csv += `"${s.item}","${s.chestNumber}","","",""\n`;
-        });
-        downloadCSV(csv, 'Madrafest_Valuation_Sheet.csv');
-    }
-
-    // 3. വിജയികളുടെ ലിസ്റ്റ് (Winners List)
-    function exportWinnersList() {
-        let csv = 'Item,Place,Chest Number,Name,Group,Grade\n';
-        const winners = allEntries.filter(s => s.place);
-        winners.sort((a,b) => a.item.localeCompare(b.item) || a.place - b.place);
-        winners.forEach(s => {
-            csv += `"${s.item}","${s.place}","${s.chestNumber}","${s.name}","${s.team}","${s.grade}"\n`;
-        });
-        downloadCSV(csv, 'Madrafest_Winners_List.csv');
-    }
-
-    // 4. ഗ്രൂപ്പ് പോയിന്റ് റിപ്പോർട്ട്
-    function exportGroupScores() {
-        let totalBadr = 0; let totalHira = 0; let totalFurqan = 0;
-        allEntries.forEach(s => {
-            let pts = 0;
-            if(s.place === "1") pts += 5;
-            else if(s.place === "2") pts += 3;
-            else if(s.place === "3") pts += 1;
-            
-            if(s.grade === "A+") pts += 5;
-            else if(s.grade === "A") pts += 3;
-            else if(s.grade === "B") pts += 1;
-
-            if (s.team === 'Badr') totalBadr += pts;
-            if (s.team === 'Hira') totalHira += pts;
-            if (s.team === 'Furqan') totalFurqan += pts;
-        });
-
-        let csv = 'Group Name,Total Points\n';
-        csv += `"BADR","${totalBadr}"\n`;
-        csv += `"HIRA","${totalHira}"\n`;
-        csv += `"FURQAN","${totalFurqan}"\n`;
-        
-        downloadCSV(csv, 'Madrafest_Group_Standings.csv');
-    }
-
-    // CSV ഫയൽ ഫോണിലേക്ക്/കമ്പ്യൂട്ടറിലേക്ക് ഡൗൺലോഡ് ചെയ്യിക്കുന്ന കോമൺ ഫങ്ക്ഷൻ
-    function downloadCSV(csvContent, fileName) {
-        // മലയാളം അക്ഷരങ്ങൾ എക്സലിൽ കറക്റ്റ് ആയി വരാൻ BOM (Byte Order Mark) ചേർക്കുന്നു
-        const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", fileName);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    // ഡിലീറ്റ് ഫങ്ക്ഷൻ (ബാക്ക്-എൻഡ് വഴി ഡിലീറ്റ് ചെയ്യാൻ)
-    async function deleteEntry(index) {
-        if(confirm("ഈ എൻട്രി പൂർണ്ണമായി ഡിലീറ്റ് ചെയ്യണമെന്നുറപ്പാണോ?")) {
-            const response = await fetch('/api/delete-student', {
+    async function deleteEntry(chestNumber, item) {
+        if(confirm(`തീർച്ചയായും ഈ എൻട്രി ഡിലീറ്റ് ചെയ്യണോ?\nChest No: ${chestNumber}\nItem: ${item}`)) {
+            const response = await fetch('/api/delete', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ index })
+                body: JSON.stringify({ chestNumber, item })
             });
-            if(response.ok) {
+            const result = await response.json();
+            if(result.success) {
+                alert('എൻട്രി വിജയകരമായി ഡിലീറ്റ് ചെയ്തു!');
                 loadAdminData();
+            } else {
+                alert('ഡിലീറ്റ് ചെയ്യാൻ സാധിച്ചില്ല. വീണ്ടും ശ്രമിക്കുക.');
             }
         }
+    }
+
+    // 📄 PDF നിർമ്മിക്കുന്നതിനുള്ള പ്രധാന ഫങ്ക്ഷൻ
+    function generatePDF(type) {
+        if (allData.length === 0) {
+            alert("ഡാറ്റയൊന്നും ലഭ്യമല്ലാത്തതിനാൽ PDF നിർമ്മിക്കാൻ കഴിയില്ല!");
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        let title = "";
+        let headers = [];
+        let rows = [];
+
+        // 1. കോൾ ലിസ്റ്റ് PDF
+        if (type === 'call_list') {
+            title = "MADRAFEST 2026 - OFFICIAL CALL LIST";
+            headers = [["Chest No", "Student Name", "Team Group", "Registered Event"]];
+            // മത്സരങ്ങളുടെ പേര് അടിസ്ഥാനമാക്കി സോർട്ട് ചെയ്യുന്നു
+            const sorted = [...allData].sort((a,b) => a.item.localeCompare(b.item));
+            rows = sorted.map(s => [s.chestNumber, s.name, s.team.toUpperCase(), s.item]);
+        } 
+        // 2. വാല്യൂവേഷൻ ഷീറ്റ് PDF
+        else if (type === 'valuation_sheet') {
+            title = "MADRAFEST 2026 - VALUATION SHEET";
+            headers = [["Chest No", "Event/Item", "Judge Mark", "Remarks"]];
+            const sorted = [...allData].sort((a,b) => a.item.localeCompare(b.item));
+            rows = sorted.map(s => [s.chestNumber, s.item, "", ""]);
+        } 
+        // 3. വിജയികളുടെ ലിസ്റ്റ് PDF
+        else if (type === 'winners_list') {
+            title = "MADRAFEST 2026 - OFFICIAL WINNERS LIST";
+            headers = [["Place", "Grade", "Student Name", "Chest No", "Team", "Event/Item"]];
+            // സ്ഥാനമുള്ളവരെ മാത്രം ഫിൽട്ടർ ചെയ്യുന്നു
+            const winners = allData.filter(s => s.place);
+            winners.sort((a, b) => a.item.localeCompare(b.item) || parseInt(a.place) - parseInt(b.place));
+            rows = winners.map(s => [s.place + " Place", s.grade ? s.grade : "-", s.name, s.chestNumber, s.team.toUpperCase(), s.item]);
+            
+            if(rows.length === 0) {
+                alert("വിജയികളുടെ റിസൾട്ടുകൾ ഒന്നും ഇതുവരെ പ്രഖ്യാപിച്ചിട്ടില്ല!");
+                return;
+            }
+        }
+
+        // PDF ഹെഡ്ഡർ ഡിസൈൻ
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text(title, 14, 15);
+        doc.setFontSize(10);
+        doc.setFont("Helvetica", "normal");
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
+        doc.line(14, 25, 196, 25);
+
+        // ടേബിൾ ജനറേഷൻ
+        doc.autoTable({
+            startY: 28,
+            head: headers,
+            body: rows,
+            theme: 'striped',
+            headStyles: { fillColor: [44, 62, 80], fontSize: 10, fontStyle: 'bold' },
+            bodyStyles: { fontSize: 9 },
+            margin: { top: 30 }
+        });
+
+        // ഫയൽ ഡൗൺലോഡ് ചെയ്യിക്കുന്നു
+        doc.save(`${type}_madrafest_2026.pdf`);
     }
 
     loadAdminData();
