@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Madrafest Live Results & Posters</title>
+    <title>Madrafest Live Results & Event Posters</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
         .container { background: white; max-width: 750px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
@@ -11,56 +12,73 @@
         
         .group-board { display: table; width: 100%; margin-bottom: 30px; border: 1px solid #ccc; background: #eef2f3; border-radius: 8px; padding: 10px; }
         .group-col { display: table-cell; width: 33.33%; padding: 10px; text-align: center; font-weight: bold; font-size: 18px; }
-        .group-name { color: #34495e; }
-        .group-score { font-size: 24px; margin-top: 5px; }
         .badr { color: #27ae60; }
         .hira { color: #2980b9; }
         .furqan { color: #e67e22; }
 
-        .item-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .item-title { font-size: 16px; font-weight: bold; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-bottom: 10px; text-align: left; }
+        .item-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: left; }
+        .item-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3498db; padding-bottom: 8px; margin-bottom: 10px; }
+        .item-title { font-size: 18px; font-weight: bold; color: #2c3e50; }
         
-        .winner-row { display: table; width: 100%; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 15px; text-align: left; }
+        .winner-row { display: table; width: 100%; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 15px; }
         .winner-row:last-child { border-bottom: none; }
-        .place-box { display: table-cell; width: 20%; font-weight: bold; }
-        .name-box { display: table-cell; width: 30%; color: #333; }
+        .place-box { display: table-cell; width: 25%; font-weight: bold; }
+        .name-box { display: table-cell; width: 45%; color: #333; font-weight: bold; }
         .chest-box { display: table-cell; width: 15%; color: #7f8c8d; }
-        .grade-box { display: table-cell; width: 15%; font-weight: bold; color: #9b59b6; }
-        .team-box { display: table-cell; width: 10%; font-weight: bold; }
-        .action-box { display: table-cell; width: 10%; text-align: right; }
+        .team-box { display: table-cell; width: 15%; font-weight: bold; text-align: right; }
         
-        .poster-btn { background-color: #3498db; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .poster-btn:hover { background-color: #2980b9; }
+        .event-poster-btn { background-color: #9b59b6; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .event-poster-btn:hover { background-color: #8e44ad; }
 
         .first { color: #d4af37; }
-        .second { color: #c0c0c0; }
+        .second { color: #7f8c8d; }
         .third { color: #cd7f32; }
         .no-result { font-style: italic; color: #7f8c8d; padding: 20px; }
 
-        /* 🎨 പോസ്റ്റർ പോപ്പ്-അപ്പ് വിൻഡോ */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
-        .modal-content { position: relative; width: 90%; max-width: 400px; animation: popup 0.3s ease-out; }
-        @keyframes popup { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .close-btn { position: absolute; top: -40px; right: 0; font-size: 30px; color: white; cursor: pointer; font-weight: bold; }
+        /* 🎨 പോസ്റ്റർ പോപ്പ്-അപ്പ് */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; overflow-y: auto; padding: 10px; }
+        .modal-content { position: relative; width: 100%; max-width: 420px; background: transparent; }
+        .close-btn { position: absolute; top: -45px; right: 10px; font-size: 35px; color: white; cursor: pointer; font-weight: bold; }
 
-        /* വ്യത്യസ്ത പോസ്റ്റർ സ്റ്റൈലുകൾ */
-        .poster { width: 100%; padding: 35px 25px; border-radius: 15px; box-sizing: border-box; color: white; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
-        .poster::before { content: "🎨 🏆 🎵 ✨"; position: absolute; font-size: 60px; opacity: 0.08; top: 10%; left: 5%; width: 90%; word-wrap: break-word; line-height: 80px; pointer-events: none; }
+        /* 🖼️ മാസ്റ്റർ പോസ്റ്റർ ഡിസൈൻ */
+        .poster-wrapper { width: 100%; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .poster-body { padding: 35px 25px; text-align: center; color: white; position: relative; min-height: 480px; box-sizing: border-box; }
+        
+        /* 🎨 15 വ്യത്യസ്ത സ്റ്റൈലുകൾ (വിവിധ മോഡലുകൾ) */
+        .model-0 { background: linear-gradient(135deg, #d35400, #c0392b, #2c3e50); }
+        .model-1 { background: linear-gradient(135deg, #1e3c72, #2a5298); }
+        .model-2 { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
+        .model-3 { background: linear-gradient(135deg, #ed1c24, #000000); }
+        .model-4 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .model-5 { background: linear-gradient(135deg, #fc4a1a, #f7b733); }
+        .model-6 { background: linear-gradient(135deg, #747d8c, #2f3542); }
+        .model-7 { background: linear-gradient(135deg, #8e44ad, #c0392b); }
+        .model-8 { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+        .model-9 { background: linear-gradient(135deg, #ffe259, #ffa751); }
+        .model-10 { background: linear-gradient(135deg, #134e5e, #71b280); }
+        .model-11 { background: linear-gradient(135deg, #b91c1c, #450a0a); }
+        .model-12 { background: linear-gradient(135deg, #2e1065, #3b82f6); }
+        .model-13 { background: linear-gradient(135deg, #064e3b, #047857); }
+        .model-14 { background: linear-gradient(135deg, #4c1d95, #db2777); }
 
-        .poster-style-1 { background: linear-gradient(135deg, #f1c40f, #f39c12, #d35400); border: 5px solid #fff; }
-        .poster-style-2 { background: linear-gradient(135deg, #7f8c8d, #34495e, #2c3e50); border: 5px solid #fff; }
-        .poster-style-3 { background: linear-gradient(135deg, #e67e22, #d35400, #c0392b); border: 5px solid #fff; }
+        .poster-body::before { content: "🎨 ✨ 🏆 ✨ 🎵"; position: absolute; font-size: 50px; opacity: 0.07; top: 15%; left: 0; width: 100%; text-align: center; letter-spacing: 10px; }
 
-        .fest-title { font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .fest-sub { font-size: 14px; opacity: 0.9; margin-bottom: 25px; border-bottom: 1px dashed rgba(255,255,255,0.5); padding-bottom: 8px; }
-        .congrats { font-size: 16px; font-weight: bold; font-style: italic; margin-bottom: 15px; background: rgba(255,255,255,0.2); display: inline-block; padding: 3px 15px; border-radius: 20px; }
-        .winner-name { font-size: 28px; font-weight: bold; margin: 10px 0; text-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
-        .winner-details { font-size: 16px; margin-bottom: 20px; font-weight: 500; }
-        .winner-team { font-size: 18px; font-weight: bold; background: white; color: #333; display: inline-block; padding: 5px 20px; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .medal-icon { font-size: 65px; margin-bottom: 10px; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); }
+        .p-fest-title { font-size: 26px; font-weight: bold; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); margin-bottom: 2px; }
+        .p-fest-sub { font-size: 14px; opacity: 0.9; margin-bottom: 25px; border-bottom: 1px dashed rgba(255,255,255,0.4); padding-bottom: 8px; }
+        .p-item-title { font-size: 20px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 25px; display: inline-block; margin-bottom: 25px; box-shadow: inset 0 0 10px rgba(255,255,255,0.2); }
+        
+        .p-winner-box { background: rgba(255,255,255,0.95); color: #2c3e50; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+        .p-medal { font-size: 35px; margin-right: 12px; }
+        .p-info { flex-grow: 1; }
+        .p-name { font-size: 20px; font-weight: bold; color: #111; }
+        .p-team { font-size: 14px; font-weight: bold; padding: 3px 8px; border-radius: 4px; color: white; display: inline-block; margin-top: 3px; }
+        
+        .tb-badr { background-color: #27ae60; }
+        .tb-hira { background-color: #2980b9; }
+        .tb-furqan { background-color: #e67e22; }
 
-        /* 🟢 വാട്സാപ്പ് ഷെയർ ബട്ടൺ സ്റ്റൈൽ */
-        .whatsapp-share-btn { display: block; width: 100%; background-color: #25D366; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 8px; margin-top: 15px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        /* 🟢 വാട്സാപ്പ് ഷെയർ ബട്ടൺ */
+        .whatsapp-share-btn { display: block; width: 100%; background-color: #25D366; color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 8px; margin-top: 15px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; }
         .whatsapp-share-btn:hover { background-color: #128C7E; }
     </style>
 </head>
@@ -71,16 +89,13 @@
     
     <div class="group-board">
         <div class="group-col">
-            <div class="group-name">BADR</div>
-            <div id="scoreBadr" class="group-score badr">0</div>
+            <span class="badr">BADR: <span id="scoreBadr">0</span></span>
         </div>
         <div class="group-col" style="border-left: 1px solid #ccc; border-right: 1px solid #ccc;">
-            <div class="group-name">HIRA</div>
-            <div id="scoreHira" class="group-score hira">0</div>
+            <span class="hira">HIRA: <span id="scoreHira">0</span></span>
         </div>
         <div class="group-col">
-            <div class="group-name">FURQAN</div>
-            <div id="scoreFurqan" class="group-score furqan">0</div>
+            <span class="furqan">FURQAN: <span id="scoreFurqan">0</span></span>
         </div>
     </div>
 
@@ -91,22 +106,26 @@
 <div id="posterModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closePoster()">&times;</span>
-        <div id="posterArea"></div>
-        <div id="shareArea"></div>
+        
+        <div id="posterWrapper" class="poster-wrapper">
+            <div id="posterBody" class="poster-body">
+                </div>
+        </div>
+        
+        <button class="whatsapp-share-btn" onclick="shareToWhatsAppImage()">🟢 Share Poster to WhatsApp</button>
     </div>
 </div>
 
 <script>
-    let activeList = [];
+    let itemsMap = {};
 
     async function loadResults() {
         const response = await fetch('/api/results');
         const students = await response.json();
         
         const activeStudents = students.filter(s => s.place || s.grade);
-        activeList = activeStudents;
 
-        const itemsMap = {};
+        itemsMap = {};
         activeStudents.forEach(student => {
             if (!itemsMap[student.item]) {
                 itemsMap[student.item] = [];
@@ -126,23 +145,21 @@
             document.getElementById('noResultMsg').style.display = 'none';
         }
 
-        itemNames.forEach(itemName => {
+        itemNames.forEach((itemName, index) => {
             const list = itemsMap[itemName];
-            
-            list.sort((a, b) => {
-                const pA = a.place ? parseInt(a.place) : 99;
-                const pB = b.place ? parseInt(b.place) : 99;
-                return pA - pB;
-            });
+            list.sort((a, b) => (a.place ? parseInt(a.place) : 99) - (b.place ? parseInt(b.place) : 99));
 
-            let cardHtml = `<div class="item-card"><div class="item-title">${itemName}</div>`;
+            // ഓരോ മത്സരത്തിനും 15 മോഡലുകളിൽ നിന്ന് ഒന്ന് മാറി മാറി ലഭിക്കാൻ (Index % 15)
+            const modelId = index % 15;
+
+            let cardHtml = `<div class="item-card">
+                <div class="item-header">
+                    <div class="item-title">${itemName}</div>
+                    <button class="event-poster-btn" onclick="openEventPoster('${itemName}', ${modelId})">🎨 Poster</button>
+                </div>`;
             
             list.forEach(student => {
-                let placeText = "None";
-                let icon = "• ";
-                let pClass = "";
-                let pts = 0;
-
+                let placeText = "None"; let icon = "• "; let pClass = ""; let pts = 0;
                 if(student.place === "1") { placeText = "1st Place"; icon = "🥇 "; pClass = "first"; pts += 5; }
                 else if(student.place === "2") { placeText = "2nd Place"; icon = "🥈 "; pClass = "second"; pts += 3; }
                 else if(student.place === "3") { placeText = "3rd Place"; icon = "🥉 "; pClass = "third"; pts += 1; }
@@ -155,17 +172,11 @@
                 if (student.team === 'Hira') totalHira += pts;
                 if (student.team === 'Furqan') totalFurqan += pts;
 
-                const studentIdx = activeList.findIndex(s => s.chestNumber === student.chestNumber && s.item === student.item);
-
                 cardHtml += `<div class="winner-row">
                     <span class="place-box ${pClass}">${icon}${placeText}</span>
-                    <span class="name-box">${student.name}</span>
+                    <span class="name-box">${student.name} ${student.grade ? `(${student.grade})` : ''}</span>
                     <span class="chest-box">Chest: ${student.chestNumber}</span>
-                    <span class="grade-box">${student.grade ? student.grade + ' Grade' : '-'}</span>
-                    <span class="team-box">${student.team}</span>
-                    <span class="action-box">
-                        ${student.place ? `<button class="poster-btn" onclick="openPoster(${studentIdx})">🎨 Poster</button>` : ''}
-                    </span>
+                    <span class="team-box ${student.team.toLowerCase()}">${student.team.toUpperCase()}</span>
                 </div>`;
             });
 
@@ -178,58 +189,70 @@
         document.getElementById('scoreFurqan').innerText = totalFurqan;
     }
 
-    function openPoster(idx) {
-        const student = activeList[idx];
-        const area = document.getElementById('posterArea');
-        const shareArea = document.getElementById('shareArea');
+    // 🎨 മത്സരങ്ങളുടെ പോസ്റ്റർ മോഡൽ തുറക്കുന്ന ഫങ്ക്ഷൻ
+    function openEventPoster(itemName, modelId) {
+        const list = itemsMap[itemName];
+        const body = document.getElementById('posterBody');
         
-        let posterClass = "poster-style-1";
-        let medal = "🥇";
-        let titleText = "ഒന്നാം സ്ഥാനം";
+        // നിലവിലുള്ള ക്ലാസുകൾ മാറ്റി പുതിയ മോഡൽ ക്ലാസ്സ് കൊടുക്കുന്നു
+        body.className = `poster-body model-${modelId}`;
+        
+        let htmlContent = `
+            <div class="p-fest-title">🏆 MADRAFEST 2026 🏆</div>
+            <div class="p-fest-sub">കലാ-കായിക സാഹിത്യ മത്സരങ്ങൾ</div>
+            <div class="p-item-title">${itemName}</div>
+        `;
 
-        if(student.place === "2") {
-            posterClass = "poster-style-2";
-            medal = "🥈";
-            titleText = "രണ്ടാം സ്ഥാനം";
-        } else if(student.place === "3") {
-            posterClass = "poster-style-3";
-            medal = "🥉";
-            titleText = "മൂന്നാം സ്ഥാനം";
-        }
+        list.forEach(student => {
+            if(!student.place) return; // സ്ഥാനമില്ലാത്തവരെ ഒഴിവാക്കുന്നു
+            let medal = "🥇";
+            if(student.place === "2") medal = "🥈";
+            if(student.place === "3") medal = "🥉";
 
-        const gradeText = student.grade ? `ഉയർന്ന ഗ്രേഡ്: ${student.grade}` : '';
-
-        area.innerHTML = `
-            <div class="poster ${posterClass}">
-                <div class="fest-title">🏆 MADRAFEST 2026 🏆</div>
-                <div class="fest-sub">കലാ-കായിക സാഹിത്യ മത്സരങ്ങൾ</div>
-                
-                <div class="medal-icon">${medal}</div>
-                <div class="congrats">${titleText}</div>
-                
-                <div class="winner-name">${student.name}</div>
-                
-                <div class="winner-details">
-                    ചെസ്റ്റ് നമ്പർ: <strong>${student.chestNumber}</strong><br>
-                    മത്സരം: <strong>${student.item}</strong><br>
-                    <span style="font-size:14px; opacity:0.9;">${gradeText}</span>
+            htmlContent += `
+                <div class="p-winner-box">
+                    <div class="p-medal">${medal}</div>
+                    <div class="p-info">
+                        <div class="p-name">${student.name}</div>
+                        <div style="font-size:13px; color:#555;">Chest No: ${student.chestNumber} ${student.grade ? `| Grade: ${student.grade}` : ''}</div>
+                    </div>
+                    <div>
+                        <span class="p-team tb-${student.team.toLowerCase()}">TEAM ${student.team.toUpperCase()}</span>
+                    </div>
                 </div>
-                
-                <div class="winner-team">TEAM ${student.team.toUpperCase()}</div>
-            </div>
-        `;
+            `;
+        });
 
-        // 🟢 വാട്സാപ്പിലേക്ക് അയക്കാനുള്ള മെസ്സേജ് നിർമ്മിക്കുന്നു
-        const currentUrl = window.location.href;
-        const whatsappText = `*🏆 MADRAFEST 2026 RESULT 🏆*%0A%0A🎉 *അഭിനന്ദനങ്ങൾ!* 🎉%0A%0A👤 *പേര്:* ${student.name}%0A🔢 *ചെസ്റ്റ് നമ്പർ:* ${student.chestNumber}%0A🟢 *ഗ്രൂപ്പ്:* TEAM ${student.team.toUpperCase()}%0A🎨 *മത്സരം:* ${student.item}%0A🏅 *നേട്ടം:* ${medal} *${titleText}* ${student.grade ? `(${student.grade} Grade)` : ''}%0A%0A👇 റിസൾട്ട് പോസ്റ്റർ ലൈവായി കാണാൻ താഴെ ലിങ്കിൽ ക്ലിക്ക് ചെയ്യുക:%0A🔗 ${currentUrl}`;
-
-        shareArea.innerHTML = `
-            <a href="https://api.whatsapp.com/send?text=${whatsappText}" target="_blank" class="whatsapp-share-btn">
-                🟢 Share to WhatsApp
-            </a>
-        `;
-
+        body.innerHTML = htmlContent;
         document.getElementById('posterModal').style.display = 'flex';
+    }
+
+    // 📲 പോസ്റ്റർ ഇമേജ് ആയി മാറ്റി വാട്സാപ്പിലേക്ക് ഷെയർ ചെയ്യുന്ന ഫങ്ക്ഷൻ
+    function shareToWhatsAppImage() {
+        const poster = document.getElementById('posterWrapper');
+        
+        // html2canvas ഉപയോഗിച്ച് പോസ്റ്റർ ഡിസൈനെ ചിത്രമാക്കുന്നു
+        html2canvas(poster, { useCORS: true, scale: 2 }).then(canvas => {
+            canvas.toBlob(blob => {
+                const file = new File([blob], "result_poster.png", { type: "image/png" });
+                
+                // മൊബൈലിലെ ഒഫീഷ്യൽ ഷെയറിങ് സിസ്റ്റം (Web Share API) വഴി ചിത്രം നേരിട്ട് അയക്കുന്നു
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    navigator.share({
+                        files: [file],
+                        title: 'Madrafest Result Poster',
+                        text: '🥇 മദ്രസ ഫെസ്റ്റ് മത്സര ഫലം!'
+                    }).catch(err => console.log("Share Error:", err));
+                } else {
+                    // വെബ് ഷെയറിങ് സപ്പോർട്ട് ചെയ്യാത്ത ബ്രൗസറുകൾക്കായി ചിത്രം ഡൗൺലോഡ് ചെയ്യിപ്പിക്കുന്നു
+                    const link = document.createElement('a');
+                    link.download = 'result_poster.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                    alert("നിങ്ങളുടെ ബ്രൗസർ ഡയറക്ട് ഷെയറിങ് സപ്പോർട്ട് ചെയ്യുന്നില്ല. പോസ്റ്റർ ഫോണിലേക്ക് ഡൗൺലോഡ് ആയിട്ടുണ്ട്, ഇത് വാട്സാപ്പിൽ നേരിട്ട് അപ്‌ലോഡ് ചെയ്യാം!");
+                }
+            }, 'image/png');
+        });
     }
 
     function closePoster() {
@@ -237,7 +260,7 @@
     }
 
     loadResults();
-    setInterval(loadResults, 10000);
+    setInterval(loadResults, 15000);
 </script>
 
 </body>
