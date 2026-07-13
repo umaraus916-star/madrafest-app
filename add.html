@@ -58,29 +58,19 @@
 
         <div class="form-group">
             <label>വിഭാഗം (Category):</label>
-            <select id="student-category">
+            <select id="student-category" onchange="updateEventItems()">
                 <option value="">തിരഞ്ഞെടുക്കുക</option>
                 <option value="കിഡ്സ്">കിഡ്സ് (Kids)</option>
                 <option value="സബ് ജൂനിയർ">സബ് ജൂനിയർ (Sub Junior)</option>
                 <option value="ജൂനിയർ">ജൂനിയർ (Junior)</option>
                 <option value="സീനിയർ">സീനിയർ (Senior)</option>
-                <option value="ജനറൽ">ജനറൽ (General)</option>
             </select>
         </div>
 
         <div class="form-group">
             <label>മത്സര ഇനം (Event Item):</label>
             <select id="event-item">
-                <option value="">മത്സരം തിരഞ്ഞെടുക്കുക</option>
-                <option value="ഖിറാഅത്ത്">ഖിറാഅത്ത്</option>
-                <option value="പ്രസംഗം (മലയാളം)">പ്രസംഗം (മലയാളം)</option>
-                <option value="പ്രസംഗം (അറബിക്)">പ്രസംഗം (അറബിക്)</option>
-                <option value="മാപ്പിളപ്പാട്ട്">മാപ്പിളപ്പാട്ട്</option>
-                <option value="കഥാപ്രസംഗം">കഥാപ്രസംഗം</option>
-                <option value="ഉർദു ഗാനം">ഉർദു ഗാനം</option>
-                <option value="ക്വിസ്">ക്വിസ്</option>
-                <option value="രചന">രചന</option>
-                <option value="ഹിഫ്ള്">ഹിഫ്ള്</option>
+                <option value="">ആദ്യം വിഭാഗം തിരഞ്ഞെടുക്കുക</option>
             </select>
         </div>
 
@@ -89,6 +79,32 @@
 </div>
 
 <script>
+    // 📋 നിങ്ങൾ നൽകിയ മത്സര ഇനങ്ങളുടെ കൃത്യമായ ലിസ്റ്റ് (വിഭാഗം തിരിച്ച്)
+    const eventData = {
+        "കിഡ്സ്": ["കേട്ടെഴുത്ത്", "കളറിംഗ്", "കസേരക്കളി", "മെമ്മറി ടെസ്റ്റ്"],
+        "സബ് ജൂനിയർ": ["വായന അറബി മലയാളം", "കയ്യെഴുത്ത്", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "ചിത്ര രചന", "ക്വിസ്"],
+        "ജൂനിയർ": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ചിത്ര രചന", "ക്വിസ്", "കഥാ രചന", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "വായന അറബി"],
+        "സീനിയർ": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ബുർദ", "ക്വിസ്", "കവിത രചന", "ചിത്ര രചന", "കാലിഗ്രാഫി", "പ്രബന്ധ രചന"]
+    };
+
+    // വിഭാഗം മാറുമ്പോൾ അതിനനുസരിച്ചുള്ള മത്സരങ്ങൾ മാത്രം ലിസ്റ്റിൽ കാണിക്കാനുള്ള ഫങ്ഷൻ
+    function updateEventItems() {
+        const category = document.getElementById('student-category').value;
+        const itemSelect = document.getElementById('event-item');
+        
+        itemSelect.innerHTML = '<option value="">മത്സരം തിരഞ്ഞെടുക്കുക</option>';
+        
+        if (category && eventData[category]) {
+            eventData[category].forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                itemSelect.appendChild(option);
+            });
+        }
+    }
+
+    // 🔍 ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേര് കണ്ടെത്താൻ
     async function fetchStudentNameForAdd() {
         const idInput = document.getElementById('student-id').value.trim();
         const nameInput = document.getElementById('student-name');
@@ -113,6 +129,7 @@
         }
     }
 
+    // സബ്മിറ്റ് ചെയ്യുമ്പോൾ
     function submitEvent() {
         const id = document.getElementById('student-id').value;
         const name = document.getElementById('student-name').value;
@@ -125,9 +142,10 @@
             return;
         }
 
-        alert(`${name} (${category} - ${gender}) എന്ന കുട്ടിക്ക് "${item}" എന്ന മത്സരം വിജയകരമായി ചേർത്തു!`);
+        alert(`${name} എന്ന കുട്ടിക്ക് ${category} വിഭാഗത്തിൽ "${item}" മത്സരം ചേർത്തു!`);
         document.getElementById('add-event-form').reset();
         document.getElementById('status-message').innerHTML = '';
+        document.getElementById('event-item').innerHTML = '<option value="">ആദ്യം വിഭാഗം തിരഞ്ഞെടുക്കുക</option>';
     }
 </script>
 </body>
