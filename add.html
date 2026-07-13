@@ -15,9 +15,9 @@
         /* ഗ്രൂപ്പുകളുടെ സ്റ്റൈൽ */
         .group-selection { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
         .group-btn { padding: 12px 25px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; color: white; }
-        .btn-badhr { background-color: #28a745; } /* പച്ച */
-        .btn-uhadh { background-color: #dc3545; } /* ചുവപ്പ് */
-        .btn-hunayn { background-color: #ffc107; color: #333; } /* മഞ്ഞ */
+        .btn-badhr { background-color: #28a745; }
+        .btn-uhadh { background-color: #dc3545; }
+        .btn-hunayn { background-color: #ffc107; color: #333; }
         .group-btn:hover { opacity: 0.9; transform: translateY(-2px); }
         .group-btn.active { outline: 3px solid #007bff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
@@ -26,8 +26,15 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; color: #34495e; }
         input, select { width: 100%; padding: 12px; box-sizing: border-box; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 16px; }
+        input:focus, select:focus { border-color: #3498db; outline: none; }
         .readonly-box { background-color: #e2e8f0; font-weight: bold; color: #475569; }
-        .submit-btn { width: 100%; background: #28a745; color: white; padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        
+        /* മത്സരങ്ങൾ ചെക്ക്ബോക്സ് രൂപത്തിൽ കാണിക്കാൻ */
+        .events-checkbox-container { display: none; background: #f8fafc; border: 2px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
+        .checkbox-item { display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; font-size: 16px; }
+        .checkbox-item input { width: auto; margin-right: 12px; transform: scale(1.3); cursor: pointer; }
+        
+        .submit-btn { width: 100%; background: #28a745; color: white; padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 15px; }
         
         #status-message { margin-top: 6px; font-size: 14px; font-weight: bold; }
         .info-msg { color: #28a745; }
@@ -53,83 +60,86 @@
     </div>
 
     <div id="form-container" class="form-section">
-        <h3 style="margin-top:0; color:#1e293b;">📝 മത്സരങ്ങൾ ആഡ് ചെയ്യുക: <span id="selected-group-text" style="color:#007bff;"></span></h3>
+        <h3 style="margin-top:0; color:#1e293b;">📝 വിവരങ്ങൾ ചേർക്കുക: <span id="selected-group-text" style="color:#007bff;"></span></h3>
         
         <form id="add-event-form">
             <div class="form-group">
                 <label>Chess No / Reg No (ചെസ്സ് നമ്പർ):</label>
-                <input type="text" id="student-id" placeholder="ചെസ്സ് നമ്പർ ടൈപ്പ് ചെയ്യുമ്പോൾ മറ്റ് വിവരങ്ങൾ വരും" oninput="fetchStudentDetailsByGroup()">
+                <input type="text" id="student-id" placeholder="ചെസ്സ് നമ്പർ ടൈപ്പ് ചെയ്യുക" oninput="fetchStudentNameOnly()">
                 <div id="status-message"></div>
             </div>
 
             <div class="form-group">
-                <label>വിദ്യാര്ത്ഥിയുടെ പേര്:</label>
-                <input type="text" id="student-name" class="readonly-box" placeholder="ഓട്ടോമാറ്റിക്കായി വരും" readonly>
+                <label>വിദ്യാർത്ഥിയുടെ പേര്:</label>
+                <input type="text" id="student-name" class="readonly-box" placeholder="ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ തനിയെ വരും" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>വിഭാഗം (Gender):</label>
+                <select id="student-gender">
+                    <option value="">തിരഞ്ഞെടുക്കുക</option>
+                    <option value="ആൺകുട്ടി">ആൺകുട്ടി (Boys)</option>
+                    <option value="പെൺകുട്ടി">പെൺകുട്ടി (Girls)</option>
+                </select>
             </div>
 
             <div class="form-group">
                 <label>വിഭാഗം (Category):</label>
-                <input type="text" id="student-category" class="readonly-box" placeholder="ഓട്ടോമാറ്റിക്കായി വരും" readonly>
-            </div>
-
-            <div class="form-group">
-                <label>മത്സര ഇനം (Event Item):</label>
-                <select id="event-item">
-                    <option value="">മത്സരം തിരഞ്ഞെടുക്കുക</option>
-                    <option value="കേട്ടെഴുത്ത്">കേട്ടെഴുത്ത്</option>
-                    <option value="കളറിംഗ്">കളറിംഗ്</option>
-                    <option value="കസേരക്കളി">കസേരക്കളി</option>
-                    <option value="മെമ്മറി ടെസ്റ്റ്">മെമ്മറി ടെസ്റ്റ്</option>
-                    <option value="വായന അറബി മലയാളം">വായന അറബി മലയാളം</option>
-                    <option value="കയ്യെഴുത്ത്">കയ്യെഴുത്ത്</option>
-                    <option value="കേട്ടെഴുത്ത് (അറബി മലയാളം)">കേട്ടെഴുത്ത് (അറബി മലയാളം)</option>
-                    <option value="ചിത്ര രചന">ചിത്ര രചന</option>
-                    <option value="ക്വിസ്">ക്വിസ്</option>
-                    <option value="മാലപ്പാട്ട്">മാലപ്പാട്ട്</option>
-                    <option value="മൗലീദ് പാരായണം">മൗലീദ് പാരായണം</option>
-                    <option value="കഥാ രചന">കഥാ രചന</option>
-                    <option value="വായന അറബി">വായന അറബി</option>
-                    <option value="ബുർദ">ബുർദ</option>
-                    <option value="കവിത രചന">കവിത രചന</option>
-                    <option value="കാലിഗ്രാഫി">കാലിഗ്രാഫി</option>
-                    <option value="പ്രബന്ധ രചന">പ്രബന്ധ രചന</option>
+                <select id="student-category" onchange="showCategoryEvents()">
+                    <option value="">തിരഞ്ഞെടുക്കുക</option>
+                    <option value="കിഡ്സ്">കിഡ്സ് (Kids)</option>
+                    <option value="സബ് ജൂനിയർ">സബ് ജൂനിയർ (Sub Junior)</option>
+                    <option value="ജൂനിയർ">ജൂനിയർ (Junior)</option>
+                    <option value="സീനിയർ">സീനിയർ (Senior)</option>
                 </select>
             </div>
 
-            <button type="button" class="submit-btn" onclick="submitEvent()">മത്സരം ആഡ് ചെയ്യുക</button>
+            <div class="form-group">
+                <label id="checkbox-label" style="display:none;">പങ്കെടുക്കുന്ന മത്സരങ്ങൾ തിരഞ്ഞെടുക്കുക (ഒന്നിൽ കൂടുതൽ സെലക്ട് ചെയ്യാം):</label>
+                <div id="events-checkbox-list" class="events-checkbox-container"></div>
+            </div>
+
+            <button type="button" class="submit-btn" onclick="submitEvent()">മത്സരങ്ങൾ ആഡ് ചെയ്യുക</button>
         </form>
     </div>
 </div>
 
 <script>
+    // 📋 മത്സരങ്ങളുടെ വിവരങ്ങൾ
+    const eventData = {
+        "കിഡ്സ്": ["കേട്ടെഴുത്ത്", "കളറിംഗ്", "കസേരക്കളി", "മെമ്മറി ടെസ്റ്റ്"],
+        "സബ് ജൂനിയർ": ["വായന അറബി മലയാളം", "കയ്യെഴുത്ത്", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "ചിത്ര രചന", "ക്വിസ്"],
+        "ജൂനിയർ": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ചിത്ര രചന", "ക്വിസ്", "കഥാ രചന", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "വായന അറബി"],
+        "സീനിയർ": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ബുർദ", "ക്വിസ്", "കവിത രചന", "ചിത്ര രചന", "കാലിഗ്രാഫി", "പ്രബന്ധ രചന"]
+    };
+
     let currentSelectedGroup = "";
 
-    // 1. ഗ്രൂപ്പ് ബട്ടൺ ഞെക്കുമ്പോൾ ഫോം ഓപ്പൺ ആക്കാൻ
+    // 1. ഗ്രൂപ്പ് ഞെക്കുമ്പോൾ ഫോം തുറക്കാൻ
     function selectMadrasaGroup(groupName, btn) {
         currentSelectedGroup = groupName;
         
-        // ബട്ടണുകൾക്ക് ആക്റ്റീവ് സ്റ്റൈൽ നൽകാൻ
         document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        // ഫോം കാണിക്കുക
         document.getElementById('selected-group-text').textContent = groupName + " Team";
         document.getElementById('form-container').style.display = "block";
         
-        // മുൻപ് അടിച്ച ഡാറ്റകൾ ഉണ്ടെങ്കിൽ ക്ലിയർ ചെയ്യാൻ
+        // റീസെറ്റ് ചെയ്യുക
         document.getElementById('add-event-form').reset();
         document.getElementById('status-message').innerHTML = '';
+        document.getElementById('checkbox-label').style.display = "none";
+        document.getElementById('events-checkbox-list').style.display = "none";
     }
 
-    // 2. ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ ആ ഗ്രൂപ്പിലുള്ള കുട്ടിയുടെ പേരും കാറ്റഗറിയും തനിയെ വരാൻ
-    async function fetchStudentDetailsByGroup() {
+    // 2. ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ ആ ഗ്രൂപ്പിലുള്ള കുട്ടിയുടെ പേര് മാത്രം തനിയെ വരാൻ
+    async function fetchStudentNameOnly() {
         const idInput = document.getElementById('student-id').value.trim();
         const nameInput = document.getElementById('student-name');
-        const categoryInput = document.getElementById('student-category');
         const statusMsg = document.getElementById('status-message');
 
         if (!idInput) {
-            nameInput.value = ''; categoryInput.value = ''; statusMsg.innerHTML = '';
+            nameInput.value = ''; statusMsg.innerHTML = '';
             return;
         }
 
@@ -137,7 +147,7 @@
             const res = await fetch('/api/students');
             const students = await res.json();
             
-            // ചെസ്സ് നമ്പറും നമ്മൾ തിരഞ്ഞെടുത്ത ഗ്രൂപ്പും മാച്ച് ചെയ്യുന്ന കുട്ടിയെ കണ്ടെത്തുന്നു
+            // ചെസ്സ് നമ്പറും നമ്മൾ തിരഞ്ഞെടുത്ത ഗ്രൂപ്പും ഒരുമിച്ച് മാച്ച് ചെയ്യുന്ന കുട്ടിയെ ഫിൽറ്റർ ചെയ്യും
             const student = students.find(s => 
                 (s.id === idInput || s.id === Number(idInput).toString()) && 
                 (s.team === currentSelectedGroup)
@@ -145,10 +155,9 @@
 
             if (student) {
                 nameInput.value = student.name || '';
-                categoryInput.value = student.category || 'ജനറൽ';
                 statusMsg.innerHTML = `<span class="info-msg">✓ കുട്ടിയെ കണ്ടെത്തി! (${currentSelectedGroup} Team)</span>`;
             } else {
-                nameInput.value = ''; categoryInput.value = '';
+                nameInput.value = '';
                 statusMsg.innerHTML = `<span class="error-msg">❌ ഈ ഗ്രൂപ്പിൽ (${currentSelectedGroup}) ഈ ചെസ്സ് നമ്പറുള്ള കുട്ടിയെ കണ്ടെത്തിയില്ല!</span>`;
             }
         } catch (error) {
@@ -156,22 +165,66 @@
         }
     }
 
-    // സേവ് ചെയ്യുമ്പോൾ
+    // 3. കാറ്റഗറി സെലക്ട് ചെയ്യുമ്പോൾ മത്സരങ്ങൾ ഒന്നിലധികം തിരഞ്ഞെടുക്കാവുന്ന ചെക്ക്ബോക്സ് ലിസ്റ്റ് കാണിക്കാൻ
+    function showCategoryEvents() {
+        const category = document.getElementById('student-category').value;
+        const checkboxContainer = document.getElementById('events-checkbox-list');
+        const checkboxLabel = document.getElementById('checkbox-label');
+        
+        checkboxContainer.innerHTML = "";
+        
+        if (category && eventData[category]) {
+            checkboxLabel.style.display = "block";
+            checkboxContainer.style.display = "block";
+            
+            eventData[category].forEach(item => {
+                const label = document.createElement('label');
+                label.className = "checkbox-item";
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = "checkbox";
+                checkbox.name = "student-events";
+                checkbox.value = item;
+                
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(item));
+                
+                checkboxContainer.appendChild(label);
+            });
+        } else {
+            checkboxLabel.style.display = "none";
+            checkboxContainer.style.display = "none";
+        }
+    }
+
+    // ഫോം സബ്മിറ്റ് ചെയ്യുമ്പോൾ
     function submitEvent() {
         const id = document.getElementById('student-id').value;
         const name = document.getElementById('student-name').value;
-        const item = document.getElementById('event-item').value;
+        const gender = document.getElementById('student-gender').value;
+        const category = document.getElementById('student-category').value;
+        
+        // സെലക്ട് ചെയ്ത മത്സരങ്ങൾ കണ്ടെത്തുന്നു
+        const selectedCheckboxes = document.querySelectorAll('input[name="student-events"]:checked');
+        const selectedEvents = Array.from(selectedCheckboxes).map(cb => cb.value);
 
-        if (!id || !name || !item) {
-            alert("ദയവായി സാധുവായ ചെസ്സ് നമ്പറും മത്സര ഇനവും നൽകുക!");
+        if (!id || !name || !gender || !category) {
+            alert("ദയവായി എല്ലാ വിവരങ്ങളും പൂർണ്ണമായി പൂരിപ്പിക്കുക!");
             return;
         }
 
-        alert(`${name} എന്ന കുട്ടിയെ "${item}" എന്ന മത്സരത്തിലേക്ക് വിജയകരമായി ചേർത്തു!`);
+        if (selectedEvents.length === 0) {
+            alert("ദയവായി കുറഞ്ഞത് ഒരു മത്സരമെങ്കിലും തിരഞ്ഞെടുക്കുക!");
+            return;
+        }
+
+        alert(`${name} എന്ന കുട്ടിക്ക് (${category} - ${gender}) താഴെ പറയുന്ന മത്സരങ്ങൾ വിജയകരമായി ചേർത്തു:\n\n${selectedEvents.join(", ")}`);
         
         // ഫോം റീസെറ്റ് ചെയ്യുക
         document.getElementById('add-event-form').reset();
         document.getElementById('status-message').innerHTML = '';
+        document.getElementById('checkbox-label').style.display = "none";
+        document.getElementById('events-checkbox-list').style.display = "none";
     }
 </script>
 </body>
