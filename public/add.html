@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Student Details</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
-        .form-container { background: white; max-width: 400px; margin: 30px auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
-        h2 { color: #333; }
-        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
-        button { background-color: #2ecc71; color: white; border: none; font-weight: bold; cursor: pointer; }
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; direction: ltr; }
+        .form-container { background: white; max-width: 450px; margin: 20px auto; padding: 25px; border-radius: 10px; box-shadow: 0px 0px 15px rgba(0,0,0,0.1); text-align: right; }
+        h2 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
+        label { font-weight: bold; display: block; margin-top: 10px; color: #555; text-align: right; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; text-align: right; }
+        input { text-align: left; }
+        #chestNumber { text-align: left; }
+        button { background-color: #2ecc71; color: white; border: none; font-weight: bold; cursor: pointer; text-align: center; margin-top: 15px; }
         button:hover { background-color: #27ae60; }
-        .msg { font-weight: bold; margin-top: 10px; }
+        .msg { font-weight: bold; margin-top: 15px; text-align: center; }
     </style>
 </head>
 <body>
@@ -19,12 +22,37 @@
 <div class="form-container">
     <h2>കുട്ടികളുടെ വിവരങ്ങൾ ചേർക്കുക</h2>
     <form id="studentForm">
-        <input type="text" id="chestNumber" placeholder="ചെസ്റ്റ് നമ്പർ (Chest No)" required>
-        <input type="text" id="name" placeholder="കുട്ടിയുടെ പേര് (Name)" required>
-        <input type="text" id="item" placeholder="മത്സരയിനം (Item / Event)" required>
         
+        <label>ചെസ്റ്റ് നമ്പർ:</label>
+        <input type="text" id="chestNumber" placeholder="Chest Number" required>
+        
+        <label>കുട്ടിയുടെ പേര്:</label>
+        <input type="text" id="name" placeholder="Name" required>
+
+        <label>വിഭാഗം (Category):</label>
+        <select id="category" onchange="updateItems()" required>
+            <option value="">സെലക്ട് ചെയ്യുക</option>
+            <option value="Senior">Senior (സീനിയർ)</option>
+            <option value="Junior">Junior (ജൂനിയർ)</option>
+            <option value="Sub_Junior">Sub Junior (സബ് ജൂനിയർ)</option>
+            <option value="Kids">Kids (കിഡ്സ്)</option>
+        </select>
+
+        <label>വിഭാഗം (Gender):</label>
+        <select id="gender" required>
+            <option value="">സെലക്ട് ചെയ്യുക</option>
+            <option value="Boys">Boys (ആൺകുട്ടികൾ)</option>
+            <option value="Girls">Girls (പെൺകുട്ടികൾ)</option>
+        </select>
+        
+        <label>മത്സരയിനം (Item):</label>
+        <select id="item" required>
+            <option value="">ആദ്യം വിഭാഗം സെലക്ട് ചെയ്യുക</option>
+        </select>
+        
+        <label>ടീം (Team):</label>
         <select id="team" required>
-            <option value="">ടീം സെലക്ട് ചെയ്യുക</option>
+            <option value="">സെലക്ട് ചെയ്യുക</option>
             <option value="Badr">Badr</option>
             <option value="Hira">Hira</option>
             <option value="Furqan">Furqan</option>
@@ -36,11 +64,36 @@
 </div>
 
 <script>
+    const itemsData = {
+        "Senior": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ബുർദ", "ക്വിസ്", "കവിത രചന", "ചിത്ര രചന", "കാലിഗ്രാഫി", "പ്രബന്ധ രചന"],
+        "Junior": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ചിത്ര രചന", "ക്വിസ്", "കഥാ രചന", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "വായന അറബി"],
+        "Sub_Junior": ["വായന അറബി മലയാളം", "കയ്യെഴുത്ത്", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "ചിത്ര രചന", "ക്വിസ്"],
+        "Kids": ["കേട്ടെഴുത്ത്", "കളറിംഗ്", "കസേരക്കളി", "മെമ്മറി ടെസ്റ്റ്"]
+    };
+
+    function updateItems() {
+        const category = document.getElementById('category').value;
+        const itemSelect = document.getElementById('item');
+        
+        itemSelect.innerHTML = '<option value="">മത്സരം സെലക്ട് ചെയ്യുക</option>';
+        
+        if (category && itemsData[category]) {
+            itemsData[category].forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.text = item;
+                itemSelect.appendChild(option);
+            });
+        }
+    }
+
     document.getElementById('studentForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const chestNumber = document.getElementById('chestNumber').value;
         const name = document.getElementById('name').value;
+        const category = document.getElementById('category').value;
+        const gender = document.getElementById('gender').value;
         const item = document.getElementById('item').value;
         const team = document.getElementById('team').value;
         const messageDiv = document.getElementById('message');
@@ -48,10 +101,13 @@
         messageDiv.innerText = "Saving...";
         messageDiv.style.color = "blue";
 
+        // മത്സരയിനത്തോടൊപ്പം കാറ്റഗറിയും ജെൻഡറും കൂടി ചേർക്കുന്നു (ഉദാഹരണത്തിന്: മാലപ്പാട്ട് - Senior (Boys))
+        const fullItemName = `${item} - ${category} (${gender})`;
+
         const response = await fetch('/api/add-student', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chestNumber, name, item, team })
+            body: JSON.stringify({ chestNumber, name, item: fullItemName, team })
         });
 
         const result = await response.json();
@@ -60,6 +116,7 @@
             messageDiv.innerText = "വിജയകരമായി സേവ് ആയി! ✅";
             messageDiv.style.color = "green";
             document.getElementById('studentForm').reset();
+            document.getElementById('item').innerHTML = '<option value="">ആദ്യം വിഭാഗം സെലക്ട് ചെയ്യുക</option>';
         } else {
             messageDiv.innerText = "Error: " + result.error;
             messageDiv.style.color = "red";
