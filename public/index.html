@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Madrafest Live Results</title>
+    <title>Madrafest Live Results & Posters</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
         .container { background: white; max-width: 750px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
@@ -23,15 +23,46 @@
         .winner-row { display: table; width: 100%; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 15px; text-align: left; }
         .winner-row:last-child { border-bottom: none; }
         .place-box { display: table-cell; width: 20%; font-weight: bold; }
-        .name-box { display: table-cell; width: 40%; color: #333; }
+        .name-box { display: table-cell; width: 30%; color: #333; }
         .chest-box { display: table-cell; width: 15%; color: #7f8c8d; }
-        .grade-box { display: table-cell; width: 13%; font-weight: bold; color: #9b59b6; }
-        .team-box { display: table-cell; width: 12%; font-weight: bold; text-align: right; }
+        .grade-box { display: table-cell; width: 15%; font-weight: bold; color: #9b59b6; }
+        .team-box { display: table-cell; width: 10%; font-weight: bold; }
+        .action-box { display: table-cell; width: 10%; text-align: right; }
         
+        .poster-btn { background-color: #3498db; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .poster-btn:hover { background-color: #2980b9; }
+
         .first { color: #d4af37; }
         .second { color: #c0c0c0; }
         .third { color: #cd7f32; }
         .no-result { font-style: italic; color: #7f8c8d; padding: 20px; }
+
+        /* 🎨 പോസ്റ്റർ പോപ്പ്-അപ്പ് വിൻഡോ */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
+        .modal-content { position: relative; width: 90%; max-width: 400px; animation: popup 0.3s ease-out; }
+        @keyframes popup { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .close-btn { position: absolute; top: -40px; right: 0; font-size: 30px; color: white; cursor: pointer; font-weight: bold; }
+
+        /* വ്യത്യസ്ത പോസ്റ്റർ സ്റ്റൈലുകൾ (കലാമേള തീം) */
+        .poster { width: 100%; padding: 35px 25px; border-radius: 15px; box-sizing: border-box; color: white; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
+        
+        /* പശ്ചാത്തലത്തിലെ ആർട്സ് ഡിസൈൻ എലമെന്റുകൾ */
+        .poster::before { content: "🎨 🏆 🎵 ✨"; position: absolute; font-size: 60px; opacity: 0.08; top: 10%; left: 5%; width: 90%; word-wrap: break-word; line-height: 80px; pointer-events: none; }
+
+        /* 🥇 ഒന്നാം സ്ഥാനത്തിന്റെ പോസ്റ്റർ (Gold/Royal Theme) */
+        .poster-style-1 { background: linear-gradient(135deg, #f1c40f, #f39c12, #d35400); border: 5px solid #fff; }
+        /* 🥈 രണ്ടാം സ്ഥാനത്തിന്റെ പോസ്റ്റർ (Silver/Creative Theme) */
+        .poster-style-2 { background: linear-gradient(135deg, #7f8c8d, #34495e, #2c3e50); border: 5px solid #fff; }
+        /* 🥉 മൂന്നാം സ്ഥാനത്തിന്റെ പോസ്റ്റർ (Bronze/Artistic Theme) */
+        .poster-style-3 { background: linear-gradient(135deg, #e67e22, #d35400, #c0392b); border: 5px solid #fff; }
+
+        .fest-title { font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .fest-sub { font-size: 14px; opacity: 0.9; margin-bottom: 25px; border-bottom: 1px dashed rgba(255,255,255,0.5); padding-bottom: 8px; }
+        .congrats { font-size: 16px; font-weight: bold; font-style: italic; margin-bottom: 15px; background: rgba(255,255,255,0.2); display: inline-block; padding: 3px 15px; border-radius: 20px; }
+        .winner-name { font-size: 28px; font-weight: bold; margin: 10px 0; text-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+        .winner-details { font-size: 16px; margin-bottom: 20px; font-weight: 500; }
+        .winner-team { font-size: 18px; font-weight: bold; background: white; color: #333; display: inline-block; padding: 5px 20px; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .medal-icon { font-size: 65px; margin-bottom: 10px; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); }
     </style>
 </head>
 <body>
@@ -58,13 +89,22 @@
     <div id="noResultMsg" class="no-result" style="display:none;">റിസൾട്ടുകൾ ഒന്നും തന്നെ പ്രഖ്യാപിച്ചിട്ടില്ല! ⏱️</div>
 </div>
 
+<div id="posterModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closePoster()">&times;</span>
+        <div id="posterArea"></div>
+    </div>
+</div>
+
 <script>
+    let activeList = [];
+
     async function loadResults() {
         const response = await fetch('/api/results');
         const students = await response.json();
         
-        // സ്ഥാനമോ ഗ്രേഡോ ലഭിച്ച കുട്ടികളെ മാത്രം ഫിൽട്ടർ ചെയ്യുക
         const activeStudents = students.filter(s => s.place || s.grade);
+        activeList = activeStudents;
 
         const itemsMap = {};
         activeStudents.forEach(student => {
@@ -89,7 +129,6 @@
         itemNames.forEach(itemName => {
             const list = itemsMap[itemName];
             
-            // സ്ഥാനത്തിന്റെ അടിസ്ഥാനത്തിൽ ആദ്യം ക്രമീകരിക്കുന്നു (1st, 2nd, 3rd)
             list.sort((a, b) => {
                 const pA = a.place ? parseInt(a.place) : 99;
                 const pB = b.place ? parseInt(b.place) : 99;
@@ -108,7 +147,6 @@
                 else if(student.place === "2") { placeText = "2nd Place"; icon = "🥈 "; pClass = "second"; pts += 3; }
                 else if(student.place === "3") { placeText = "3rd Place"; icon = "🥉 "; pClass = "third"; pts += 1; }
 
-                // ഗ്രേഡ് അടിസ്ഥാനമാക്കിയുള്ള പോയിന്റുകൾ (വേണമെങ്കിൽ കൂട്ടാം)
                 if(student.grade === "A+") pts += 5;
                 else if(student.grade === "A") pts += 3;
                 else if(student.grade === "B") pts += 1;
@@ -117,12 +155,18 @@
                 if (student.team === 'Hira') totalHira += pts;
                 if (student.team === 'Furqan') totalFurqan += pts;
 
+                // ഓരോ കുട്ടിയുടെയും എൻട്രിയുടെ ഇൻഡെക്സ് വെച്ചാണ് ബട്ടൺ വർക്ക് ചെയ്യുന്നത്
+                const studentIdx = activeList.findIndex(s => s.chestNumber === student.chestNumber && s.item === student.item);
+
                 cardHtml += `<div class="winner-row">
                     <span class="place-box ${pClass}">${icon}${placeText}</span>
                     <span class="name-box">${student.name}</span>
                     <span class="chest-box">Chest: ${student.chestNumber}</span>
                     <span class="grade-box">${student.grade ? student.grade + ' Grade' : '-'}</span>
-                    <span class="team-box ${student.team.toLowerCase()}">${student.team}</span>
+                    <span class="team-box">${student.team}</span>
+                    <span class="action-box">
+                        ${student.place ? `<button class="poster-btn" onclick="openPoster(${studentIdx})">🎨 Poster</button>` : ''}
+                    </span>
                 </div>`;
             });
 
@@ -135,8 +179,57 @@
         document.getElementById('scoreFurqan').innerText = totalFurqan;
     }
 
+    // 🎨 പോസ്റ്റർ നിർമ്മിക്കുന്ന പ്രധാന ഫങ്ക്ഷൻ
+    function openPoster(idx) {
+        const student = activeList[idx];
+        const area = document.getElementById('posterArea');
+        
+        let posterClass = "poster-style-1";
+        let medal = "🥇";
+        let titleText = "ഒന്നാം സ്ഥാനം";
+
+        if(student.place === "2") {
+            posterClass = "poster-style-2";
+            medal = "🥈";
+            titleText = "രണ്ടാം സ്ഥാനം";
+        } else if(student.place === "3") {
+            posterClass = "poster-style-3";
+            medal = "🥉";
+            titleText = "മൂന്നാം സ്ഥാനം";
+        }
+
+        const gradeText = student.grade ? `ഉയർന്ന ഗ്രേഡ്: ${student.grade}` : '';
+
+        area.innerHTML = `
+            <div class="poster ${posterClass}">
+                <div class="fest-title">🏆 MADRAFEST 2026 🏆</div>
+                <div class="fest-sub">കലാ-കായിക സാഹിത്യ മത്സരങ്ങൾ</div>
+                
+                <div class="medal-icon">${medal}</div>
+                <div class="congrats">${titleText}</div>
+                
+                <div class="winner-name">${student.name}</div>
+                
+                <div class="winner-details">
+                    ചെസ്റ്റ് നമ്പർ: <strong>${student.chestNumber}</strong><br>
+                    മത്സരം: <strong>${student.item}</strong><br>
+                    <span style="font-size:14px; opacity:0.9;">${gradeText}</span>
+                </div>
+                
+                <div class="winner-team">TEAM ${student.team.toUpperCase()}</div>
+            </div>
+        `;
+
+        document.getElementById('posterModal').style.display = 'flex';
+    }
+
+    function closePoster() {
+        document.getElementById('posterModal').style.display = 'none';
+    }
+
     loadResults();
-    setInterval(loadResults, 5000);
+    // ലൈവ് അപ്ഡേറ്റിനായി 10 സെക്കൻഡിൽ ഒരിക്കൽ റിഫ്രഷ് ചെയ്യുന്നു
+    setInterval(loadResults, 10000);
 </script>
 
 </body>
