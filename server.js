@@ -7,12 +7,16 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// 1. പ്രധാന പേജിലേക്ക് പോകുമ്പോൾ reg.html ലോഡ് ചെയ്യുക
+// 1. പ്രധാന റൂട്ടിൽ index.html തന്നെ കാണിക്കുക
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'reg.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// 2. വിദ്യാർത്ഥികളുടെ ലിസ്റ്റ് എടുക്കാനുള്ള API
+// 2. ആരെങ്കിലും home.html എന്ന് അടിച്ചാലും ഇത് തന്നെ വരാൻ
+app.get('/home.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.get('/api/students', (req, res) => {
     fs.readFile(path.join(__dirname, 'students.json'), 'utf8', (err, data) => {
         if (err) return res.status(500).send("Error reading file");
@@ -20,7 +24,6 @@ app.get('/api/students', (req, res) => {
     });
 });
 
-// 3. ഇവന്റും ഗ്രൂപ്പും ഒരുമിച്ച് അപ്‌ഡേറ്റ് ചെയ്യാനുള്ള API
 app.post('/api/register-event', (req, res) => {
     const { id, team, gender, category, events } = req.body;
 
