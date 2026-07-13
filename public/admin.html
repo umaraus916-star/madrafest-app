@@ -3,153 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control Panel</title>
+    <title>Admin Control & Reports</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
-        .container { background: white; max-width: 800px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
-        th { background-color: #2c3e50; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .btn-edit { background-color: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; }
-        .btn-delete { background-color: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; margin-left: 5px; }
+        .container { background: white; max-width: 800px; margin: auto; padding: 25px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; }
         
-        /* Edit Modal Form */
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0,0,0,0.3); z-index: 10; width: 90%; max-width: 400px; text-align: right; }
-        .modal input, .modal select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; text-align: right; }
-        .modal input[type="text"] { text-align: left; }
-        .modal button { width: 48%; padding: 10px; font-weight: bold; border-radius: 5px; cursor: pointer; border: none; }
-        .btn-save { background-color: #2ecc71; color: white; }
-        .btn-cancel { background-color: #7f8c8d; color: white; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5; }
+        /* റിപ്പോർട്ട് സെക്ഷൻ സ്റ്റൈൽ */
+        .report-section { background: #eef2f3; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #ccc; }
+        .report-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 10px; }
+        .download-btn { background-color: #27ae60; color: white; border: none; padding: 10px 15px; font-weight: bold; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        .download-btn:hover { background-color: #219150; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #34495e; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>⚙️ അഡ്മിൻ കൺട്രോൾ പാനൽ (Edit/Delete)</h1>
+    <h2>⚙️ അഡ്മിൻ കൺട്രോൾ പാനൽ & റിപ്പോർട്ടുകൾ</h2>
+    
+    <div class="report-section">
+        <h3>📊 റിപ്പോർട്ടുകൾ ഡൗൺലോഡ് ചെയ്യുക (Excel/CSV)</h3>
+        <div class="report-grid">
+            <button class="download-btn" onclick="exportCallList()">📞 കോൾ ലിസ്റ്റ് (Call List)</button>
+            <button class="download-btn" onclick="exportValuationSheet()">📝 വാല്യൂവേഷൻ ഷീറ്റ്</button>
+            <button class="download-btn" onclick="exportWinnersList()">🏆 വിജയികളുടെ ലിസ്റ്റ്</button>
+            <button class="download-btn" onclick="exportGroupScores()">📈 ഗ്രൂപ്പ് പോയിന്റ് റിപ്പോർട്ട്</button>
+        </div>
+    </div>
+
+    <h3>📋 രജിസ്റ്റർ ചെയ്ത മുഴുവൻ വിവരങ്ങളും</h3>
     <table>
         <thead>
             <tr>
                 <th>Chest No</th>
                 <th>Name</th>
-                <th>Item / Category</th>
-                <th>Team</th>
-                <th>Mark</th>
-                <th>Actions</th>
+                <th>Item</th>
+                <th>Group</th>
+                <th>Place</th>
+                <th>Grade</th>
+                <th>Action</th>
             </tr>
         </thead>
-        <tbody id="adminTable">
+        <tbody id="adminTableBody">
             </tbody>
     </table>
 </div>
 
-<div class="overlay" id="overlay"></div>
-<div class="modal" id="editModal">
-    <h3 style="text-align:center;">വിവരങ്ങൾ തിരുത്തുക</h3>
-    <input type="hidden" id="editIndex">
-    
-    <label>ചെസ്റ്റ് നമ്പർ:</label>
-    <input type="text" id="editChest" style="background-color:#eee;" readonly>
-    
-    <label>പേര്:</label>
-    <input type="text" id="editName" style="background-color:#eee;" readonly>
-
-    <label>ടീം (Team):</label>
-    <select id="editTeam">
-        <option value="Badr">Badr</option>
-        <option value="Hira">Hira</option>
-        <option value="Furqan">Furqan</option>
-    </select>
-    
-    <label>മാർക്ക്:</label>
-    <input type="number" id="editMark">
-
-    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
-        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-save" onclick="saveEdit()">Save Changes</button>
-    </div>
-</div>
-
 <script>
-    let registeredStudents = [];
+    let allEntries = [];
 
     async function loadAdminData() {
-        const response = await fetch('/api/results');
-        registeredStudents = await response.json();
-        const tableBody = document.getElementById('adminTable');
-        tableBody.innerHTML = '';
-
-        registeredStudents.forEach((student, index) => {
-            const row = `<tr>
-                <td>${student.chestNumber}</td>
-                <td>${student.name}</td>
-                <td>${student.item}</td>
-                <td>${student.team}</td>
-                <td>${student.mark}</td>
-                <td>
-                    <button class="btn-edit" onclick="openEditModal(${index})">Edit</button>
-                    <button class="btn-delete" onclick="deleteStudent(${index})">Delete</button>
-                </td>
-            </tr>`;
-            tableBody.innerHTML += row;
-        });
-    }
-
-    function openEditModal(index) {
-        const student = registeredStudents[index];
-        document.getElementById('editIndex').value = index;
-        document.getElementById('editChest').value = student.chestNumber;
-        document.getElementById('editName').value = student.name;
-        document.getElementById('editTeam').value = student.team;
-        document.getElementById('editMark').value = student.mark;
-
-        document.getElementById('editModal').style.display = 'block';
-        document.getElementById('overlay').style.display = 'block';
-    }
-
-    function closeModal() {
-        document.getElementById('editModal').style.display = 'none';
-        document.getElementById('overlay').style.display = 'none';
-    }
-
-    async function saveEdit() {
-        const index = document.getElementById('editIndex').value;
-        const team = document.getElementById('editTeam').value;
-        const mark = document.getElementById('editMark').value;
-        const student = registeredStudents[index];
-
-        const response = await fetch('/api/edit-student', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chestNumber: student.chestNumber, item: student.item, team, mark })
-        });
-
-        const result = await response.json();
-        if(result.success) {
-            closeModal();
-            loadAdminData();
-        } else {
-            alert("Error updating details");
+        const response = await fetch('/api/results-all');
+        if(response.ok) {
+            allEntries = await response.json();
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+            
+            allEntries.forEach((student, index) => {
+                const row = `<tr>
+                    <td>${student.chestNumber}</td>
+                    <td>${student.name}</td>
+                    <td>${student.item}</td>
+                    <td>${student.team}</td>
+                    <td>${student.place ? student.place : '-'}</td>
+                    <td>${student.grade ? student.grade : '-'}</td>
+                    <td><button class="delete-btn" onclick="deleteEntry(${index})">Delete</button></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
         }
     }
 
-    async function deleteStudent(index) {
-        if(!confirm("ഈ കുട്ടിയുടെ ഈ മത്സരത്തിലുള്ള രജിസ്ട്രേഷൻ ഡിലീറ്റ് ചെയ്യണോ?")) return;
-        const student = registeredStudents[index];
+    // 1. കോൾ ലിസ്റ്റ് എക്സ്പോർട്ട് (Call List)
+    function exportCallList() {
+        let csv = 'Chest Number,Name,Group,Item\n';
+        allEntries.forEach(s => {
+            csv += `"${s.chestNumber}","${s.name}","${s.team}","${s.item}"\n`;
+        });
+        downloadCSV(csv, 'Madrafest_Call_List.csv');
+    }
 
-        const response = await fetch('/api/delete-student', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chestNumber: student.chestNumber, item: student.item })
+    // 2. വാല്യൂവേഷൻ ഷീറ്റ് എക്സ്പോർട്ട് (Valuation Sheet - കുട്ടികളുടെ പേര് ഉണ്ടാകില്ല)
+    function exportValuationSheet() {
+        let csv = 'Item,Chest Number,Place (1st/2nd/3rd),Grade (A+/A/B),Signature\n';
+        // മത്സരയിനത്തിന്റെ അടിസ്ഥാനത്തിൽ സോർട്ട് ചെയ്യുന്നു
+        const sorted = [...allEntries].sort((a,b) => a.item.localeCompare(b.item));
+        sorted.forEach(s => {
+            csv += `"${s.item}","${s.chestNumber}","","",""\n`;
+        });
+        downloadCSV(csv, 'Madrafest_Valuation_Sheet.csv');
+    }
+
+    // 3. വിജയികളുടെ ലിസ്റ്റ് (Winners List)
+    function exportWinnersList() {
+        let csv = 'Item,Place,Chest Number,Name,Group,Grade\n';
+        const winners = allEntries.filter(s => s.place);
+        winners.sort((a,b) => a.item.localeCompare(b.item) || a.place - b.place);
+        winners.forEach(s => {
+            csv += `"${s.item}","${s.place}","${s.chestNumber}","${s.name}","${s.team}","${s.grade}"\n`;
+        });
+        downloadCSV(csv, 'Madrafest_Winners_List.csv');
+    }
+
+    // 4. ഗ്രൂപ്പ് പോയിന്റ് റിപ്പോർട്ട്
+    function exportGroupScores() {
+        let totalBadr = 0; let totalHira = 0; let totalFurqan = 0;
+        allEntries.forEach(s => {
+            let pts = 0;
+            if(s.place === "1") pts += 5;
+            else if(s.place === "2") pts += 3;
+            else if(s.place === "3") pts += 1;
+            
+            if(s.grade === "A+") pts += 5;
+            else if(s.grade === "A") pts += 3;
+            else if(s.grade === "B") pts += 1;
+
+            if (s.team === 'Badr') totalBadr += pts;
+            if (s.team === 'Hira') totalHira += pts;
+            if (s.team === 'Furqan') totalFurqan += pts;
         });
 
-        const result = await response.json();
-        if(result.success) {
-            loadAdminData();
-        } else {
-            alert("Error deleting student");
+        let csv = 'Group Name,Total Points\n';
+        csv += `"BADR","${totalBadr}"\n`;
+        csv += `"HIRA","${totalHira}"\n`;
+        csv += `"FURQAN","${totalFurqan}"\n`;
+        
+        downloadCSV(csv, 'Madrafest_Group_Standings.csv');
+    }
+
+    // CSV ഫയൽ ഫോണിലേക്ക്/കമ്പ്യൂട്ടറിലേക്ക് ഡൗൺലോഡ് ചെയ്യിക്കുന്ന കോമൺ ഫങ്ക്ഷൻ
+    function downloadCSV(csvContent, fileName) {
+        // മലയാളം അക്ഷരങ്ങൾ എക്സലിൽ കറക്റ്റ് ആയി വരാൻ BOM (Byte Order Mark) ചേർക്കുന്നു
+        const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // ഡിലീറ്റ് ഫങ്ക്ഷൻ (ബാക്ക്-എൻഡ് വഴി ഡിലീറ്റ് ചെയ്യാൻ)
+    async function deleteEntry(index) {
+        if(confirm("ഈ എൻട്രി പൂർണ്ണമായി ഡിലീറ്റ് ചെയ്യണമെന്നുറപ്പാണോ?")) {
+            const response = await fetch('/api/delete-student', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index })
+            });
+            if(response.ok) {
+                loadAdminData();
+            }
         }
     }
 
