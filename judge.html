@@ -6,13 +6,15 @@
     <title>മദ്രസ ഫെസ്റ്റ് - ജഡ്ജിങ് പാനൽ</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .nav-bar { background: #343a40; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-bar a { color: white; text-decoration: none; font-weight: bold; padding: 5px 10px; background: #007bff; border-radius: 4px; }
+        .nav-title { color: white; font-weight: bold; }
         .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
         h2 { color: #333; text-align: center; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
         button { width: 100%; background: #007bff; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        button:hover { background: #0069d9; }
         .info-msg { color: #28a745; font-weight: bold; margin-top: 5px; }
         .error-msg { color: #dc3545; font-weight: bold; margin-top: 5px; }
     </style>
@@ -20,6 +22,11 @@
 <body>
 
 <div class="container">
+    <div class="nav-bar">
+        <span class="nav-title">⚖️ ജഡ്ജിങ് ബോർഡ്</span>
+        <a href="/home.html">🏠 Home</a>
+    </div>
+
     <h2>⚖️ മദ്രസ ഫെസ്റ്റ് - ജഡ്ജിങ് പാനൽ</h2>
     <hr>
     
@@ -29,75 +36,46 @@
             <input type="text" id="student-id" placeholder="ഉദാഹരണത്തിന്: 78" oninput="fetchStudentName()">
             <div id="status-message"></div>
         </div>
-
         <div class="form-group">
             <label>വിദ്യാർത്ഥിയുടെ പേര് (Auto-Fill):</label>
-            <input type="text" id="student-name" placeholder="ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേര് ഇവിടെ വരും" readonly style="background-color: #e9ecef; font-weight: bold; color: #495057;">
+            <input type="text" id="student-name" placeholder="പേര് ഇവിടെ വരും" readonly style="background-color: #e9ecef; font-weight: bold;">
         </div>
-
         <div class="form-group">
             <label>മത്സര ഇനം (Item):</label>
             <input type="text" id="event-item" placeholder="ഇനത്തിന്റെ പേര്">
         </div>
-
         <div class="form-group">
             <label>മാർക്ക് (Mark):</label>
-            <input type="number" id="student-mark" placeholder="മാർക്ക് നൽകുക" min="0" max="100">
+            <input type="number" id="student-mark" placeholder="മാർക്ക് നൽകുക">
         </div>
-
         <button type="button" onclick="submitMark()">മാർക്ക് സബ്മിറ്റ് ചെയ്യുക</button>
     </form>
 </div>
 
 <script>
-    // 🔍 ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേര് തനിയെ എടുക്കാനുള്ള ഫങ്ഷൻ
     async function fetchStudentName() {
         const idInput = document.getElementById('student-id').value.trim();
         const nameInput = document.getElementById('student-name');
         const statusMsg = document.getElementById('status-message');
-
-        if (!idInput) {
-            nameInput.value = '';
-            statusMsg.innerHTML = '';
-            return;
-        }
-
+        if (!idInput) { nameInput.value = ''; statusMsg.innerHTML = ''; return; }
         try {
-            // നമ്മൾ ഉണ്ടാക്കിയ എപിഐയിലേക്ക് കണക്ട് ചെയ്യുന്നു
             const res = await fetch('/api/students');
             const students = await res.json();
-
-            // ടൈപ്പ് ചെയ്ത ഐഡിയുള്ള കുട്ടിയെ കണ്ടെത്തുന്നു
             const student = students.find(s => s.id === idInput);
-
             if (student) {
                 nameInput.value = student.name;
-                statusMsg.innerHTML = `<span class="info-msg">✓ കുട്ടിയെ കണ്ടെത്തി: ${student.team || ''} Team</span>`;
+                statusMsg.innerHTML = `<span class="info-msg">✓ കണ്ടെത്തി: ${student.team || ''} Team</span>`;
             } else {
                 nameInput.value = '';
-                statusMsg.innerHTML = '<span class="error-msg">❌ ഈ ചെസ്സ് നമ്പറിൽ കുട്ടിയെ കണ്ടെത്തിയില്ല!</span>';
+                statusMsg.innerHTML = '<span class="error-msg">❌ കുട്ടിയെ കണ്ടെത്തിയില്ല!</span>';
             }
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
+        } catch (error) { console.error(error); }
     }
-
-    // മാർക്ക് സബ്മിറ്റ് ചെയ്യുമ്പോൾ (ആവശ്യമെങ്കിൽ ബാക്കെൻഡിലേക്ക് വിടാം)
     function submitMark() {
-        const id = document.getElementById('student-id').value;
-        const name = document.getElementById('student-name').value;
-        const mark = document.getElementById('student-mark').value;
-
-        if (!id || !name || !mark) {
-            alert("എല്ലാ വിവരങ്ങളും കൃത്യമായി പൂരിപ്പിക്കുക!");
-            return;
-        }
-
-        alert(`${name} (Chess No: ${id}) എന്ന കുട്ടിക്ക് ${mark} മാർക്ക് രേഖപ്പെടുത്തി!`);
+        alert("മാർക്ക് വിജയകരമായി രേഖപ്പെടുത്തി!");
         document.getElementById('judge-form').reset();
         document.getElementById('status-message').innerHTML = '';
     }
 </script>
-
 </body>
 </html>

@@ -6,36 +6,38 @@
     <title>മദ്രസ ഫെസ്റ്റ് - അഡ്മിൻ പാനൽ</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .nav-bar { background: #343a40; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-bar a { color: white; text-decoration: none; font-weight: bold; padding: 5px 10px; background: #007bff; border-radius: 4px; }
+        .nav-title { color: white; font-weight: bold; }
         .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
         h2, h3 { color: #333; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
         button { background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
         button:hover { background: #218838; }
         .search-box { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
-        .search-btn { background: #007bff; }
-        .search-btn:hover { background: #0069d9; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
         th { background-color: #f2f2f2; }
-        .btn-edit { background: #ffc107; color: black; padding: 5px 10px; font-size: 12px; margin-right: 5px; }
-        .btn-delete { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+        .btn-edit { background: #ffc107; color: black; padding: 5px 10px; font-size: 12px; margin-right: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-delete { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="nav-bar">
+        <span class="nav-title">🕌 മദ്രസ ഫെസ്റ്റ് കൺട്രോൾ പാനൽ</span>
+        <a href="/home.html">🏠 Home</a>
+    </div>
+
     <h2>🕌 മദ്രസ ഫെസ്റ്റ് അഡ്മിൻ പോർട്ടൽ</h2>
     <p>ആകെ രജിസ്റ്റർ ചെയ്ത കുട്ടികൾ: <strong id="total-count">0</strong></p>
 
     <div class="search-box">
-        <h3>🔍 വിദ്യാർത്ഥിയെ തിരയുക / വിവരങ്ങൾ കാണുക</h3>
-        <div class="form-group">
-            <input type="text" id="search-input" placeholder="ചെസ്സ് നമ്പറോ പേരോ ടൈപ്പ് ചെയ്യുക...">
-        </div>
-        <button class="search-btn" onclick="searchStudent()">തിരയുക</button>
-        <div id="search-result" style="margin-top: 15px; font-weight: bold; color: #0056b3;"></div>
+        <h3>🔍 വിദ്യാർത്ഥിയെ തിരയുക</h3>
+        <input type="text" id="search-input" placeholder="ചെസ്സ് നമ്പറോ പേരോ ടൈപ്പ് ചെയ്യുക..." oninput="searchStudent()">
     </div>
 
     <div style="background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 6px;">
@@ -43,15 +45,15 @@
         <input type="hidden" id="student-key">
         <div class="form-group">
             <label>Chess No / Reg No:</label>
-            <input type="text" id="student-id" placeholder="ഉദാഹരണത്തിന്: 78">
+            <input type="text" id="student-id" placeholder="ഉദാഹരണത്തിന്: 231">
         </div>
         <div class="form-group">
             <label>വിദ്യാർത്ഥിയുടെ പേര്:</label>
             <input type="text" id="student-name" placeholder="പേര് ടൈപ്പ് ചെയ്യുക">
         </div>
         <div class="form-group">
-            <label>ടീം (വിഭാഗം):</label>
-            <input type="text" id="student-team" placeholder="ടീമിന്റെ പേര് (ഉണ്ടെങ്കിൽ)">
+            <label>ടീം (Team):</label>
+            <input type="text" id="student-team" placeholder="ടീമിന്റെ പേര്">
         </div>
         <button id="save-btn" onclick="saveStudent()">സേവ് ചെയ്യുക</button>
         <button id="cancel-btn" style="background:#6c757d; display:none;" onclick="resetForm()">ഒഴിവാക്കുക</button>
@@ -67,76 +69,46 @@
                 <th>നടപടികൾ</th>
             </tr>
         </thead>
-        <tbody id="students-table-body">
-            </tbody>
+        <tbody id="students-table-body"></tbody>
     </table>
 </div>
 
 <script>
     let allStudents = [];
-
-    // സെർവറിൽ നിന്ന് ഡാറ്റ എടുക്കാൻ
     async function fetchStudents() {
-        const res = await fetch('/api/students');
-        allStudents = await res.json();
-        document.getElementById('total-count').innerText = allStudents.length;
-        renderTable(allStudents);
+        try {
+            const res = await fetch('/api/students');
+            allStudents = await res.json();
+            document.getElementById('total-count').innerText = allStudents.length;
+            renderTable(allStudents);
+        } catch (e) { console.error(e); }
     }
-
-    // ടേബിൾ ഡിസ്പ്ലേ ചെയ്യാൻ
     function renderTable(data) {
         const tbody = document.getElementById('students-table-body');
         tbody.innerHTML = '';
         data.forEach(student => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${student.id}</strong></td>
-                    <td>${student.name}</td>
-                    <td>${student.team || '-'}</td>
-                    <td>
-                        <button class="btn-edit" onclick="editStudent('${student.id}')">തിരുത്തുക</button>
-                        <button class="btn-delete" onclick="deleteStudent('${student.id}')">ഡിലീറ്റ്</button>
-                    </td>
-                </tr>
-            `;
+            tbody.innerHTML += `<tr><td><strong>${student.id}</strong></td><td>${student.name}</td><td>${student.team || '-'}</td><td><button class="btn-edit" onclick="editStudent('${student.id}')">തിരുത്തുക</button><button class="btn-delete" onclick="deleteStudent('${student.id}')">ഡിലീറ്റ്</button></td></tr>`;
         });
     }
-
-    // സെർച്ച് ഫങ്ഷൻ
     function searchStudent() {
         const query = document.getElementById('search-input').value.toLowerCase().trim();
-        if(!query) {
-            renderTable(allStudents);
-            document.getElementById('search-result').innerText = "";
-            return;
-        }
+        if(!query) { renderTable(allStudents); return; }
         const filtered = allStudents.filter(s => s.id === query || s.name.toLowerCase().includes(query));
         renderTable(filtered);
-        
-        if(filtered.length > 0) {
-            document.getElementById('search-result').innerText = `${filtered.length} കുട്ടികളെ കണ്ടെത്തി.`;
-        } else {
-            document.getElementById('search-result').innerText = "അങ്ങനെയൊരു കുട്ടിയെ കണ്ടെത്താനായില്ല!";
-        }
     }
-
-    // എഡിറ്റ് ചെയ്യാൻ ഫോമിലേക്ക് മാറ്റുക
     function editStudent(id) {
         const student = allStudents.find(s => s.id === id);
         if(student) {
             document.getElementById('student-key').value = student.id;
             document.getElementById('student-id').value = student.id;
-            document.getElementById('student-id').disabled = true; // ഐഡി മാറ്റാൻ അനുവദിക്കില്ല
+            document.getElementById('student-id').disabled = true;
             document.getElementById('student-name').value = student.name;
-            document.getElementById('student-team').value = student.team || '-';
-            
-            document.getElementById('form-title').innerText = "📝 വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ തിരുത്തുക";
+            document.getElementById('student-team').value = student.team || '';
+            document.getElementById('form-title').innerText = "📝 വിവരങ്ങൾ തിരുത്തുക";
             document.getElementById('save-btn').innerText = "മാറ്റങ്ങൾ സേവ് ചെയ്യുക";
             document.getElementById('cancel-btn').style.display = "inline-block";
         }
     }
-
-    // ഫോം റീസെറ്റ് ചെയ്യാൻ
     function resetForm() {
         document.getElementById('student-key').value = '';
         document.getElementById('student-id').value = '';
@@ -147,56 +119,26 @@
         document.getElementById('save-btn').innerText = "സേവ് ചെയ്യുക";
         document.getElementById('cancel-btn').style.display = "none";
     }
-
-    // ആഡ് ചെയ്യാനും എഡിറ്റ് ചെയ്യാനും ഒരേ ഫങ്ഷൻ
     async function saveStudent() {
         const id = document.getElementById('student-id').value.trim();
         const name = document.getElementById('student-name').value.trim();
         const team = document.getElementById('student-team').value.trim();
         const editKey = document.getElementById('student-key').value;
-
-        if(!id || !name) {
-            alert("ചെസ്സ് നമ്പറും പേരും നിർബന്ധമാണ്!");
-            return;
-        }
-
+        if(!id || !name) { alert("ചെസ്സ് നമ്പറും പേരും വേണം!"); return; }
         const studentData = { id, name, team, item: "-" };
-
-        if(editKey) {
-            // എഡിറ്റ് ചെയ്യുക (PUT request)
-            await fetch(`/api/students/${editKey}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(studentData)
-            });
-        } else {
-            // പുതിയത് ചേർക്കുക (POST request)
-            // ഐഡി ഡ്യൂപ്ലിക്കേറ്റ് ആണോ എന്ന് നോക്കുന്നു
-            if(allStudents.some(s => s.id === id)) {
-                alert("ഈ ചെസ്സ് നമ്പർ നിലവിൽ മറ്റൊരാൾക്കുണ്ട്!");
-                return;
-            }
-            await fetch('/api/students', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(studentData)
-            });
-        }
-        resetForm();
-        fetchStudents();
+        let url = editKey ? `/api/students/${editKey}` : '/api/students';
+        let method = editKey ? 'PUT' : 'POST';
+        if(!editKey && allStudents.some(s => s.id === id)) { alert("ഈ ചെസ്സ് നമ്പർ നിലവിലുണ്ട്!"); return; }
+        const res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(studentData) });
+        if(res.ok) { resetForm(); setTimeout(fetchStudents, 500); }
     }
-
-    // ഡിലീറ്റ് ഫങ്ഷൻ
     async function deleteStudent(id) {
         if(confirm("ഈ കുട്ടിയെ ഒഴിവാക്കണോ?")) {
-            await fetch(`/api/students/${id}`, { method: 'DELETE' });
-            fetchStudents();
+            const res = await fetch(`/api/students/${id}`, { method: 'DELETE' });
+            if(res.ok) setTimeout(fetchStudents, 500);
         }
     }
-
-    // പേജ് ലോഡ് ചെയ്യുമ്പോൾ ഡാറ്റ എടുക്കുക
     fetchStudents();
 </script>
-
 </body>
 </html>
