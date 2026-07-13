@@ -3,142 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>മദ്രസ ഫെസ്റ്റ് - അഡ്മിൻ പാനൽ</title>
+    <title>മദ്രസ ഫെസ്റ്റ് - അഡ്മിൻ പാനൽ (Reports)</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
-        .nav-bar { background: #343a40; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .nav-bar a { color: white; text-decoration: none; font-weight: bold; padding: 5px 10px; background: #007bff; border-radius: 4px; }
-        .nav-title { color: white; font-weight: bold; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
-        h2, h3 { color: #333; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #218838; }
-        .search-box { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .btn-edit { background: #ffc107; color: black; padding: 5px 10px; font-size: 12px; margin-right: 5px; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-delete { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f6; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .nav-bar { background: #343a40; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .nav-bar a { color: white; text-decoration: none; font-weight: bold; padding: 6px 15px; background: #28a745; border-radius: 4px; }
+        
+        h2 { color: #2c3e50; margin-top: 0; }
+        .report-section { background: #f8fafc; border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
+        .flex-box { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        
+        select, button { padding: 12px; font-size: 16px; border-radius: 6px; border: 2px solid #cbd5e1; }
+        button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #0056b3; }
+        .btn-pdf { background: #dc3545; }
+        .btn-pdf:hover { background: #c82333; }
+
+        /* ടേബിൾ സ്റ്റൈൽ */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: left; }
+        th { background-color: #f1f5f9; color: #334155; }
+        
+        /* PDF പ്രിന്റ് ചെയ്യുമ്പോൾ ആവശ്യമില്ലാത്തവ മറയ്ക്കാനുള്ള സ്റ്റൈൽ */
+        @media print {
+            body { background: white; padding: 0; }
+            .nav-bar, .report-section, h2, p, button { display: none !important; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            table { width: 100%; border: 1px solid black; }
+            th, td { border: 1px solid black; padding: 8px; font-size: 14px; }
+            .print-title { display: block !important; text-align: center; margin-bottom: 20px; }
+        }
+        .print-title { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="nav-bar">
-        <span class="nav-title">🕌 മദ്രസ ഫെസ്റ്റ് കൺട്രോൾ പാനൽ</span>
-        <a href="/home.html">🏠 Home</a>
+        <span style="font-weight:bold; font-size:18px;">⚙️ അഡ്മിൻ റിപ്പോർട്ട് പാനൽ</span>
+        <a href="/">🏠 Home</a>
     </div>
 
-    <h2>🕌 മദ്രസ ഫെസ്റ്റ് അഡ്മിൻ പോർട്ടൽ</h2>
-    <p>ആകെ രജിസ്റ്റർ ചെയ്ത കുട്ടികൾ: <strong id="total-count">0</strong></p>
+    <h2>📊 റിപ്പോർട്ടുകളും ലിസ്റ്റുകളും (Reports & Exports)</h2>
+    <p>ഇവിടെ നിന്നും മത്സരങ്ങളുടെ കോൾ ലിസ്റ്റും ഗ്രൂപ്പ് ലിസ്റ്റുകളും തയ്യാറാക്കി PDF ആയി ഡൗൺലോഡ് ചെയ്യാം.</p>
 
-    <div class="search-box">
-        <h3>🔍 വിദ്യാർത്ഥിയെ തിരയുക</h3>
-        <input type="text" id="search-input" placeholder="ചെസ്സ് നമ്പറോ പേരോ ടൈപ്പ് ചെയ്യുക..." oninput="searchStudent()">
+    <div class="report-section">
+        <h3>👥 ഗ്രൂപ്പ് അടിസ്ഥാനത്തിലുള്ള ലിസ്റ്റ് (Team-wise Call List)</h3>
+        <div class="flex-box">
+            <select id="group-select">
+                <option value="ബദർ">ബദർ (Badhar)</option>
+                <option value="ഉഹ്ദ്">ഉഹ്ദ് (Uhadh)</option>
+                <option value="ഹുനൈൻ">ഹുനൈൻ (Hunayn)</option>
+            </select>
+            <button onclick="generateTeamReport()">ലിസ്റ്റ് കാണുക</button>
+            <button class="btn-pdf" onclick="window.print()">📥 PDF ആയി സേവ് ചെയ്യുക</button>
+        </div>
     </div>
 
-    <div style="background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 6px;">
-        <h3 id="form-title">➕ പുതിയ വിദ്യാർത്ഥിയെ ചേർക്കുക</h3>
-        <input type="hidden" id="student-key">
-        <div class="form-group">
-            <label>Chess No / Reg No:</label>
-            <input type="text" id="student-id" placeholder="ഉദാഹരണത്തിന്: 231">
+    <div class="report-section">
+        <h3>📝 മത്സര അടിസ്ഥാനത്തിലുള്ള ലിസ്റ്റ് (Event-wise Valuation Sheet)</h3>
+        <div class="flex-box">
+            <select id="category-select" onchange="loadEventsForCategory()">
+                <option value="">കാറ്റഗറി തിരഞ്ഞെടുക്കുക</option>
+                <option value="കിഡ്സ്">കിഡ്സ്</option>
+                <option value="സബ് ജൂനിയർ">സബ് ജൂനിയർ</option>
+                <option value="ജൂനിയർ">ജൂനിയർ</option>
+                <option value="സീനിയർ">സീനിയർ</option>
+            </select>
+            <select id="event-select">
+                <option value="">ആദ്യം കാറ്റഗറി സെലക്ട് ചെയ്യൂ</option>
+            </select>
+            <button onclick="generateEventReport()">ലിസ്റ്റ് കാണുക</button>
+            <button class="btn-pdf" onclick="window.print()">📥 PDF ആയി സേവ് ചെയ്യുക</button>
         </div>
-        <div class="form-group">
-            <label>വിദ്യാർത്ഥിയുടെ പേര്:</label>
-            <input type="text" id="student-name" placeholder="പേര് ടൈപ്പ് ചെയ്യുക">
-        </div>
-        <div class="form-group">
-            <label>ടീം (Team):</label>
-            <input type="text" id="student-team" placeholder="ടീമിന്റെ പേര്">
-        </div>
-        <button id="save-btn" onclick="saveStudent()">സേവ് ചെയ്യുക</button>
-        <button id="cancel-btn" style="background:#6c757d; display:none;" onclick="resetForm()">ഒഴിവാക്കുക</button>
     </div>
 
-    <h3>📋 വിദ്യാർത്ഥികളുടെ ലിസ്റ്റ്</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Chess No</th>
-                <th>പേര്</th>
-                <th>ടീം</th>
-                <th>നടപടികൾ</th>
-            </tr>
-        </thead>
-        <tbody id="students-table-body"></tbody>
-    </table>
+    <hr style="border: 0; height: 1px; background: #e2e8f0; margin: 30px 0;">
+
+    <div id="pdf-header" class="print-title">
+        <h2 id="print-main-heading">മദ്രസ ഫെസ്റ്റ് റിപ്പോർട്ട്</h2>
+        <p id="print-sub-heading"></p>
+    </div>
+
+    <div id="report-table-container">
+        <p style="text-align: center; color: #94a3b8;">ലിസ്റ്റ് കാണാൻ മുകളിലെ ബട്ടൺ അമർത്തുക...</p>
+    </div>
 </div>
 
 <script>
-    let allStudents = [];
-    async function fetchStudents() {
+    const eventData = {
+        "കിഡ്സ്": ["കേട്ടെഴുത്ത്", "കളറിംഗ്", "കസേരക്കളി", "മെമ്മറി ടെസ്റ്റ്"],
+        "സബ് ജൂനിയർ": ["വായന അറബി മലയാളം", "കയ്യെഴുത്ത്", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "ചിത്ര രചന", "ക്വിസ്"],
+        "ജൂനിയർ": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ചിത്ര രചന", "ക്വിസ്", "കഥാ രചന", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "വായന അറബി"],
+        "സീനിയർ": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ബുർദ", "ക്വിസ്", "കവിത രചന", "ചിത്ര രചന", "കാലിഗ്രാഫി", "പ്രബന്ധ രചന"]
+    };
+
+    function loadEventsForCategory() {
+        const cat = document.getElementById('category-select').value;
+        const eventSelect = document.getElementById('event-select');
+        eventSelect.innerHTML = '';
+        
+        if(cat && eventData[cat]) {
+            eventData[cat].forEach(ev => {
+                let opt = document.createElement('option');
+                opt.value = ev; opt.textContent = ev;
+                eventSelect.appendChild(opt);
+            });
+        } else {
+            eventSelect.innerHTML = '<option value="">ആദ്യം കാറ്റഗറി സെലക്ട് ചെയ്യൂ</option>';
+        }
+    }
+
+    async function generateTeamReport() {
+        const team = document.getElementById('group-select').value;
+        document.getElementById('print-sub-heading').textContent = `ഗ്രൂപ്പ് ലിസ്റ്റ്: ${team}`;
+        
         try {
             const res = await fetch('/api/students');
-            allStudents = await res.json();
-            document.getElementById('total-count').innerText = allStudents.length;
-            renderTable(allStudents);
-        } catch (e) { console.error(e); }
+            const students = await res.json();
+            const filtered = students.filter(s => s.team === team);
+            
+            let html = `<table>
+                <thead>
+                    <tr>
+                        <th>Chess No</th>
+                        <th>പേര്</th>
+                        <th>വിഭാഗം (Category)</th>
+                        <th>മത്സരങ്ങൾ</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            if(filtered.length === 0) {
+                html += `<tr><td colspan="4" style="text-align:center;">ഈ ഗ്രൂപ്പിൽ കുട്ടികളെ കണ്ടെത്തിയില്ല!</td></tr>`;
+            } else {
+                filtered.forEach(s => {
+                    html += `<tr>
+                        <td><b>${s.id}</b></td>
+                        <td>${s.name}</td>
+                        <td>${s.category || '-'}</td>
+                        <td>${s.events ? s.events.join(', ') : '-'}</td>
+                    </tr>`;
+                });
+            }
+            html += `</tbody></table>`;
+            document.getElementById('report-table-container').innerHTML = html;
+        } catch(e) { console.error(e); }
     }
-    function renderTable(data) {
-        const tbody = document.getElementById('students-table-body');
-        tbody.innerHTML = '';
-        data.forEach(student => {
-            tbody.innerHTML += `<tr><td><strong>${student.id}</strong></td><td>${student.name}</td><td>${student.team || '-'}</td><td><button class="btn-edit" onclick="editStudent('${student.id}')">തിരുത്തുക</button><button class="btn-delete" onclick="deleteStudent('${student.id}')">ഡിലീറ്റ്</button></td></tr>`;
-        });
+
+    async function generateEventReport() {
+        const cat = document.getElementById('category-select').value;
+        const ev = document.getElementById('event-select').value;
+        if(!cat || !ev) { alert("ദയവായി കാറ്റഗറിയും മത്സരവും തിരഞ്ഞെടുക്കുക!"); return; }
+        
+        document.getElementById('print-sub-heading').textContent = `മത്സരം: ${ev} (${cat})`;
+
+        try {
+            const res = await fetch('/api/students');
+            const students = await res.json();
+            
+            // ആ കാറ്റഗറിയിലും ആ മത്സരത്തിലും ഉള്ള കുട്ടികളെ ഫിൽട്ടർ ചെയ്യുന്നു
+            const filtered = students.filter(s => s.category === cat && s.events && s.events.includes(ev));
+            
+            let html = `<table>
+                <thead>
+                    <tr>
+                        <th>Chess No</th>
+                        <th>വിദ്യാർത്ഥിയുടെ പേര്</th>
+                        <th>ഗ്രൂപ്പ്</th>
+                        <th>മാർക്ക് (Valuation)</th>
+                        <th>സ്ഥാനം (Rank)</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            if(filtered.length === 0) {
+                html += `<tr><td colspan="5" style="text-align:center;">ഈ മത്സരത്തിൽ ആരും രജിസ്റ്റർ ചെയ്തിട്ടില്ല!</td></tr>`;
+            } else {
+                filtered.forEach(s => {
+                    html += `<tr>
+                        <td><b>${s.id}</b></td>
+                        <td>${s.name}</td>
+                        <td>${s.team || '-'}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>`;
+                });
+            }
+            html += `</tbody></table>`;
+            document.getElementById('report-table-container').innerHTML = html;
+        } catch(e) { console.error(e); }
     }
-    function searchStudent() {
-        const query = document.getElementById('search-input').value.toLowerCase().trim();
-        if(!query) { renderTable(allStudents); return; }
-        const filtered = allStudents.filter(s => s.id === query || s.name.toLowerCase().includes(query));
-        renderTable(filtered);
-    }
-    function editStudent(id) {
-        const student = allStudents.find(s => s.id === id);
-        if(student) {
-            document.getElementById('student-key').value = student.id;
-            document.getElementById('student-id').value = student.id;
-            document.getElementById('student-id').disabled = true;
-            document.getElementById('student-name').value = student.name;
-            document.getElementById('student-team').value = student.team || '';
-            document.getElementById('form-title').innerText = "📝 വിവരങ്ങൾ തിരുത്തുക";
-            document.getElementById('save-btn').innerText = "മാറ്റങ്ങൾ സേവ് ചെയ്യുക";
-            document.getElementById('cancel-btn').style.display = "inline-block";
-        }
-    }
-    function resetForm() {
-        document.getElementById('student-key').value = '';
-        document.getElementById('student-id').value = '';
-        document.getElementById('student-id').disabled = false;
-        document.getElementById('student-name').value = '';
-        document.getElementById('student-team').value = '';
-        document.getElementById('form-title').innerText = "➕ പുതിയ വിദ്യാർത്ഥിയെ ചേർക്കുക";
-        document.getElementById('save-btn').innerText = "സേവ് ചെയ്യുക";
-        document.getElementById('cancel-btn').style.display = "none";
-    }
-    async function saveStudent() {
-        const id = document.getElementById('student-id').value.trim();
-        const name = document.getElementById('student-name').value.trim();
-        const team = document.getElementById('student-team').value.trim();
-        const editKey = document.getElementById('student-key').value;
-        if(!id || !name) { alert("ചെസ്സ് നമ്പറും പേരും വേണം!"); return; }
-        const studentData = { id, name, team, item: "-" };
-        let url = editKey ? `/api/students/${editKey}` : '/api/students';
-        let method = editKey ? 'PUT' : 'POST';
-        if(!editKey && allStudents.some(s => s.id === id)) { alert("ഈ ചെസ്സ് നമ്പർ നിലവിലുണ്ട്!"); return; }
-        const res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(studentData) });
-        if(res.ok) { resetForm(); setTimeout(fetchStudents, 500); }
-    }
-    async function deleteStudent(id) {
-        if(confirm("ഈ കുട്ടിയെ ഒഴിവാക്കണോ?")) {
-            const res = await fetch(`/api/students/${id}`, { method: 'DELETE' });
-            if(res.ok) setTimeout(fetchStudents, 500);
-        }
-    }
-    fetchStudents();
 </script>
 </body>
 </html>
