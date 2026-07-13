@@ -42,14 +42,15 @@ app.get('/api/results', (req, res) => {
     res.json(getRegisteredStudents());
 });
 
-// ജഡ്ജിമാരുടെ പുതിയ റിസൾട്ട് സബ്മിഷൻ API
+// ജഡ്ജിമാരുടെ കറക്റ്റ് ആയ മത്സരഫലങ്ങൾ അപ്ഡേറ്റ് ചെയ്യുന്ന API
 app.post('/api/submit-judgement', (req, res) => {
-    const { chestNumber, place, grade } = req.body;
+    const { chestNumber, item, place, grade } = req.body;
     let students = getRegisteredStudents();
     
     let found = false;
     students = students.map(s => {
-        if (s.chestNumber === chestNumber) {
+        // ചെസ്റ്റ് നമ്പറും മത്സരയിനവും ഒരുമിച്ച് ഒത്തുനോക്കുന്നു
+        if (s.chestNumber === chestNumber && s.item === item) {
             s.place = place || "";
             s.grade = grade || "";
             found = true;
@@ -58,7 +59,7 @@ app.post('/api/submit-judgement', (req, res) => {
     });
 
     if (!found) {
-        return res.status(404).json({ success: false, error: "ഈ കുട്ടി മത്സരത്തിൽ രജിസ്റ്റർ ചെയ്തിട്ടില്ല!" });
+        return res.status(404).json({ success: false, error: "ഈ കുട്ടിയെ ഈ മത്സരത്തിൽ കണ്ടെത്തിയില്ല!" });
     }
 
     fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));

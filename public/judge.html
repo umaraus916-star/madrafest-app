@@ -6,7 +6,7 @@
     <title>Judge Panel</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
-        .judge-container { background: white; max-width: 400px; margin: 30px auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); text-align: right; }
+        .judge-container { background: white; max-width: 450px; margin: 30px auto; padding: 25px; border-radius: 10px; box-shadow: 0px 0px 15px rgba(0,0,0,0.1); text-align: right; }
         h2 { color: #2c3e50; text-align: center; }
         label { font-weight: bold; display: block; margin-top: 15px; color: #555; }
         input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; text-align: right; }
@@ -26,6 +26,11 @@
     <input type="text" id="chestNumber" placeholder="Chest Number ടൈപ്പ് ചെയ്യുക" oninput="findStudent()">
     
     <div id="studentDisplay" class="student-info"></div>
+
+    <label>മത്സരയിനം സെലക്ട് ചെയ്യുക (Item):</label>
+    <select id="itemSelect" required>
+        <option value="">ആദ്യം ചെസ്റ്റ് നമ്പർ അടിക്കുക</option>
+    </select>
     
     <label>സ്ഥാനം (Place - ഓപ്ഷണൽ):</label>
     <select id="place">
@@ -62,13 +67,23 @@
     function findStudent() {
         const chest = document.getElementById('chestNumber').value.trim();
         const display = document.getElementById('studentDisplay');
+        const itemSelect = document.getElementById('itemSelect');
         
-        // അധ്യാപകർ ആഡ് ചെയ്ത ലിസ്റ്റിൽ നിന്നും ഈ ചെസ്റ്റ് നമ്പറുള്ള എല്ലാ എൻട്രികളും കണ്ടെത്തുക
+        // ചെസ്റ്റ് നമ്പർ അടിസ്ഥാനമാക്കി മത്സരങ്ങൾ കണ്ടെത്തുന്നു
         const matches = allStudents.filter(s => s.chestNumber === chest);
+        
+        itemSelect.innerHTML = '<option value="">മത്സരം സെലക്ട് ചെയ്യുക</option>';
+
         if (matches.length > 0) {
-            // കുട്ടിയുടെ പേരും അവൻ പങ്കെടുക്കുന്ന മത്സരങ്ങളും കാണിക്കുക
-            const items = matches.map(m => m.item).join(', ');
-            display.innerHTML = `കുട്ടി: <strong>${matches[0].name}</strong><br><span style="font-size:13px; color:#7f8c8d;">(${items})</span>`;
+            display.innerHTML = `കുട്ടി: <strong>${matches[0].name}</strong>`;
+            
+            // കുട്ടി രജിസ്റ്റർ ചെയ്ത മത്സരങ്ങൾ ഡ്രോപ്പ്ഡൗണിലേക്ക് ആഡ് ചെയ്യുന്നു
+            matches.forEach(m => {
+                const option = document.createElement('option');
+                option.value = m.item;
+                option.text = m.item;
+                itemSelect.appendChild(option);
+            });
         } else {
             display.innerText = chest ? "കുട്ടിയെ കണ്ടെത്തിയില്ല!" : "";
         }
@@ -76,12 +91,13 @@
 
     async function submitJudgement() {
         const chestNumber = document.getElementById('chestNumber').value.trim();
+        const item = document.getElementById('itemSelect').value;
         const place = document.getElementById('place').value;
         const grade = document.getElementById('grade').value;
         const msg = document.getElementById('msg');
 
-        if(!chestNumber) {
-            alert("ദയവായി ചെസ്റ്റ് നമ്പർ നൽകുക!");
+        if(!chestNumber || !item) {
+            alert("ദയവായി ചെസ്റ്റ് നമ്പറും മത്സരവും സെലക്ട് ചെയ്യുക!");
             return;
         }
 
@@ -91,7 +107,7 @@
         const response = await fetch('/api/submit-judgement', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chestNumber, place, grade })
+            body: JSON.stringify({ chestNumber, item, place, grade })
         });
 
         const result = await response.json();
@@ -99,6 +115,7 @@
             msg.innerText = "വിവരങ്ങൾ വിജയകരമായി ചേർത്തു! ✅";
             msg.style.color = "green";
             document.getElementById('chestNumber').value = '';
+            document.getElementById('itemSelect').innerHTML = '<option value="">ആദ്യം ചെസ്റ്റ് നമ്പർ അടിക്കുക</option>';
             document.getElementById('place').value = '';
             document.getElementById('grade').value = '';
             document.getElementById('studentDisplay').innerText = '';
