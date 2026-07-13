@@ -1,7 +1,11 @@
 const express = require('express');
 const fs = require('fs');
+const path = require('path');
 const app = express();
+
 app.use(express.json());
+// HTML ഫയലുകൾ കാണിക്കാൻ വേണ്ടിയുള്ള വരി:
+app.use(express.static(path.join(__dirname)));
 
 // കുട്ടികളുടെ ലിസ്റ്റ് എടുക്കാൻ
 app.get('/api/students', (req, res) => {
@@ -24,6 +28,11 @@ app.delete('/api/students/:id', (req, res) => {
     data = data.filter(student => student.id !== studentId);
     fs.writeFileSync('students.json', JSON.stringify(data, null, 2));
     res.json({ message: "Student Deleted Successfully" });
+});
+
+// ഏതെങ്കിലും പേജ് എടുക്കുമ്പോൾ ഹോം പേജിലേക്ക് റീഡയറക്ട് ചെയ്യാൻ
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'home.html'));
 });
 
 app.listen(3000, () => console.log("Server running on port 3000"));
