@@ -69,7 +69,7 @@
         const display = document.getElementById('studentDisplay');
         const itemSelect = document.getElementById('itemSelect');
         
-        // ചെസ്റ്റ് നമ്പർ അടിസ്ഥാനമാക്കി മത്സരങ്ങൾ കണ്ടെത്തുന്നു
+        // ഈ ചെസ്റ്റ് നമ്പറിലുള്ള കുട്ടിയുടെ എല്ലാ മത്സരങ്ങളും എടുക്കുക
         const matches = allStudents.filter(s => s.chestNumber === chest);
         
         itemSelect.innerHTML = '<option value="">മത്സരം സെലക്ട് ചെയ്യുക</option>';
@@ -77,13 +77,19 @@
         if (matches.length > 0) {
             display.innerHTML = `കുട്ടി: <strong>${matches[0].name}</strong>`;
             
-            // കുട്ടി രജിസ്റ്റർ ചെയ്ത മത്സരങ്ങൾ ഡ്രോപ്പ്ഡൗണിലേക്ക് ആഡ് ചെയ്യുന്നു
-            matches.forEach(m => {
-                const option = document.createElement('option');
-                option.value = m.item;
-                option.text = m.item;
-                itemSelect.appendChild(option);
-            });
+            // പ്രധാന മാറ്റം: ഇതിനകം റിസൾട്ട് നൽകിയിട്ടില്ലാത്ത (place-ഉം grade-ഉം ശൂന്യമായ) മത്സരങ്ങൾ മാത്രം കാണിക്കുന്നു
+            const pendingMatches = matches.filter(m => !m.place && !m.grade);
+            
+            if(pendingMatches.length === 0) {
+                itemSelect.innerHTML = '<option value="">എല്ലാ മത്സരങ്ങളുടെയും റിസൾട്ട് നൽകിക്കഴിഞ്ഞു! ✅</option>';
+            } else {
+                pendingMatches.forEach(m => {
+                    const option = document.createElement('option');
+                    option.value = m.item;
+                    option.text = m.item;
+                    itemSelect.appendChild(option);
+                });
+            }
         } else {
             display.innerText = chest ? "കുട്ടിയെ കണ്ടെത്തിയില്ല!" : "";
         }
@@ -96,8 +102,8 @@
         const grade = document.getElementById('grade').value;
         const msg = document.getElementById('msg');
 
-        if(!chestNumber || !item) {
-            alert("ദയവായി ചെസ്റ്റ് നമ്പറും മത്സരവും സെലക്ട് ചെയ്യുക!");
+        if(!chestNumber || !item || item.startsWith("എല്ലാ മത്സരങ്ങളുടെയും")) {
+            alert("ദയവായി ചെസ്റ്റ് നമ്പറും സാധുവായ മത്സരവും സെലക്ട് ചെയ്യുക!");
             return;
         }
 
@@ -119,7 +125,9 @@
             document.getElementById('place').value = '';
             document.getElementById('grade').value = '';
             document.getElementById('studentDisplay').innerText = '';
-            fetchStudents(); // ലിസ്റ്റ് പുതുക്കുന്നു
+            
+            // സർവറിൽ നിന്ന് പുതിയ ഡാറ്റ വീണ്ടും ലോഡ് ചെയ്യുന്നു
+            await fetchStudents();
         } else {
             msg.innerText = "Error: " + result.error;
             msg.style.color = "red";
