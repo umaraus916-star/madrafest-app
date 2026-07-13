@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student Details</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
+        .form-container { background: white; max-width: 400px; margin: 30px auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; }
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        button { background-color: #2ecc71; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background-color: #27ae60; }
+        .msg { font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>കുട്ടികളുടെ വിവരങ്ങൾ ചേർക്കുക</h2>
+    <form id="studentForm">
+        <input type="text" id="chestNumber" placeholder="ചെസ്റ്റ് നമ്പർ (Chest No)" required>
+        <input type="text" id="name" placeholder="കുട്ടിയുടെ പേര് (Name)" required>
+        <input type="text" id="item" placeholder="മത്സരയിനം (Item / Event)" required>
+        
+        <select id="team" required>
+            <option value="">ടീം സെലക്ട് ചെയ്യുക</option>
+            <option value="Badr">Badr</option>
+            <option value="Hira">Hira</option>
+            <option value="Furqan">Furqan</option>
+        </select>
+        
+        <button type="submit">Submit Details</button>
+    </form>
+    <div id="message" class="msg"></div>
+</div>
+
+<script>
+    document.getElementById('studentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const chestNumber = document.getElementById('chestNumber').value;
+        const name = document.getElementById('name').value;
+        const item = document.getElementById('item').value;
+        const team = document.getElementById('team').value;
+        const messageDiv = document.getElementById('message');
+
+        messageDiv.innerText = "Saving...";
+        messageDiv.style.color = "blue";
+
+        const response = await fetch('/api/add-student', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chestNumber, name, item, team })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            messageDiv.innerText = "വിജയകരമായി സേവ് ആയി! ✅";
+            messageDiv.style.color = "green";
+            document.getElementById('studentForm').reset();
+        } else {
+            messageDiv.innerText = "Error: " + result.error;
+            messageDiv.style.color = "red";
+        }
+    });
+</script>
+
+</body>
+</html>
