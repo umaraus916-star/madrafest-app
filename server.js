@@ -7,14 +7,14 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// 1. പ്രധാന റൂട്ടിൽ index.html തന്നെ കാണിക്കുക
+// 1. പ്രധാന റൂട്ടിൽ നേരിട്ട് add.html (മത്സരങ്ങൾ ചേർക്കുന്ന പേജ്) കാണിക്കുക
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'add.html'));
 });
 
-// 2. ആരെങ്കിലും home.html എന്ന് അടിച്ചാലും ഇത് തന്നെ വരാൻ
+// 2. ആരെങ്കിലും home.html എന്ന് അടിച്ചാലും നേരിട്ട് add.html വരാൻ
 app.get('/home.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'add.html'));
 });
 
 app.get('/api/students', (req, res) => {
