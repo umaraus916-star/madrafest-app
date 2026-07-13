@@ -7,18 +7,31 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f6; }
         .nav-bar { background: #343a40; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .nav-bar a { color: white; text-decoration: none; font-weight: bold; padding: 6px 15px; background: #007bff; border-radius: 4px; transition: 0.3s; }
-        .nav-bar a:hover { background: #0069d9; }
+        .nav-bar a { color: white; text-decoration: none; font-weight: bold; padding: 6px 15px; background: #007bff; border-radius: 4px; }
         .nav-title { color: white; font-weight: bold; font-size: 18px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0px 8px 20px rgba(0,0,0,0.08); }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0px 8px 20px rgba(0,0,0,0.08); }
         h2 { color: #2c3e50; text-align: center; margin-top: 0; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #34495e; }
-        input, select { width: 100%; padding: 12px; box-sizing: border-box; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 16px; transition: 0.3s; }
-        input:focus, select:focus { border-color: #3498db; outline: none; }
-        .readonly-box { background-color: #e2e8f0; font-weight: bold; color: #475569; border-color: #cbd5e1; }
-        button { width: 100%; background: #28a745; color: white; padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; margin-top: 10px; }
-        button:hover { background: #218838; }
+        
+        /* കാറ്റഗറി ഗ്രൂപ്പുകളുടെ സ്റ്റൈൽ */
+        .category-grid { display: block; margin-bottom: 25px; text-align: center; }
+        .cat-btn { background: #34495e; color: white; padding: 12px 20px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin: 5px; transition: 0.3s; }
+        .cat-btn:hover { background: #2c3e50; }
+        .cat-btn.active { background: #007bff; }
+
+        /* മത്സരങ്ങളുടെ ലിസ്റ്റ് സ്റ്റൈൽ */
+        .items-section { display: none; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 25px; }
+        .item-list-btn { background: white; color: #334155; border: 1px solid #cbd5e1; padding: 10px 15px; margin: 5px; border-radius: 4px; cursor: pointer; font-weight: 500; transition: 0.2s; }
+        .item-list-btn:hover { background: #e2e8f0; }
+        .item-list-btn.active { background: #28a745; color: white; border-color: #28a745; }
+
+        /* രജിസ്ട്രേഷൻ ഫോം സ്റ്റൈൽ */
+        .form-section { display: none; background: #fff; border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; color: #34495e; }
+        input { width: 100%; padding: 10px; box-sizing: border-box; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 16px; }
+        .readonly-box { background-color: #e2e8f0; font-weight: bold; color: #475569; }
+        .submit-btn { width: 100%; background: #28a745; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        
         #status-message { margin-top: 6px; font-size: 14px; font-weight: bold; }
         .info-msg { color: #28a745; }
         .error-msg { color: #dc3545; }
@@ -32,54 +45,48 @@
         <a href="/home.html">🏠 Home</a>
     </div>
 
-    <h2>📝 വിദ്യാർത്ഥികളുടെ മത്സരങ്ങൾ ചേർക്കുക</h2>
+    <h2>🕌 മദ്രസ ഫെസ്റ്റ് - മത്സര രജിസ്ട്രേഷൻ</h2>
     <hr style="border: 0; height: 1px; background: #eee; margin-bottom: 20px;">
-    
-    <form id="add-event-form">
-        <div class="form-group">
-            <label>Chess No / Reg No (ചെസ്സ് നമ്പർ):</label>
-            <input type="text" id="student-id" placeholder="ഉദാഹരണത്തിന്: 78" oninput="fetchStudentNameForAdd()">
-            <div id="status-message"></div>
-        </div>
 
-        <div class="form-group">
-            <label>വിദ്യാർത്ഥിയുടെ പേര് (Auto-Fill):</label>
-            <input type="text" id="student-name" class="readonly-box" placeholder="ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേര് ഇവിടെ വരും" readonly>
-        </div>
+    <div class="category-grid">
+        <button class="cat-btn" onclick="selectCategory('കിഡ്സ്', this)">കിഡ്സ് (Kids)</button>
+        <button class="cat-btn" onclick="selectCategory('സബ് ജൂനിയർ', this)">സബ് ജൂനിയർ</button>
+        <button class="cat-btn" onclick="selectCategory('ജൂനിയർ', this)">ജൂനിയർ</button>
+        <button class="cat-btn" onclick="selectCategory('സീനിയർ', this)">സീനിയർ</button>
+    </div>
 
-        <div class="form-group">
-            <label>വിഭാഗം (Gender):</label>
-            <select id="student-gender">
-                <option value="">തിരഞ്ഞെടുക്കുക</option>
-                <option value="ആൺകുട്ടി">ആൺകുട്ടി (Boys)</option>
-                <option value="പെൺകുട്ടി">പെൺകുട്ടി (Girls)</option>
-            </select>
-        </div>
+    <div id="items-container" class="items-section">
+        <h3 style="margin-top:0; color:#475569;">📋 മത്സര ഇനം തിരഞ്ഞെടുക്കുക:</h3>
+        <div id="items-list"></div>
+    </div>
 
-        <div class="form-group">
-            <label>വിഭാഗം (Category):</label>
-            <select id="student-category" onchange="updateEventItems()">
-                <option value="">തിരഞ്ഞെടുക്കുക</option>
-                <option value="കിഡ്സ്">കിഡ്സ് (Kids)</option>
-                <option value="സബ് ജൂനിയർ">സബ് ജൂനിയർ (Sub Junior)</option>
-                <option value="ജൂനിയർ">ജൂനിയർ (Junior)</option>
-                <option value="സീനിയർ">സീനിയർ (Senior)</option>
-            </select>
-        </div>
+    <div id="form-container" class="form-section">
+        <h3 style="margin-top:0; color:#1e293b;">📝 രജിസ്റ്റർ ചെയ്യുക: <span id="selected-display-text" style="color:#007bff;"></span></h3>
+        
+        <form id="add-event-form">
+            <div class="form-group">
+                <label>Chess No / Reg No (ചെസ്സ് നമ്പർ):</label>
+                <input type="text" id="student-id" placeholder="ചെസ്സ് നമ്പർ ടൈപ്പ് ചെയ്യുക" oninput="fetchStudentAllDetails()">
+                <div id="status-message"></div>
+            </div>
 
-        <div class="form-group">
-            <label>മത്സര ഇനം (Event Item):</label>
-            <select id="event-item">
-                <option value="">ആദ്യം വിഭാഗം തിരഞ്ഞെടുക്കുക</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label>വിദ്യാർത്ഥിയുടെ പേര്:</label>
+                <input type="text" id="student-name" class="readonly-box" placeholder="ഓട്ടോമാറ്റിക്കായി വരും" readonly>
+            </div>
 
-        <button type="button" onclick="submitEvent()">മത്സരം ആഡ് ചെയ്യുക</button>
-    </form>
+            <div class="form-group">
+                <label>ഗ്രൂപ്പ് / ടീം:</label>
+                <input type="text" id="student-team" class="readonly-box" placeholder="ഓട്ടോമാറ്റിക്കായി വരും" readonly>
+            </div>
+
+            <button type="button" class="submit-btn" onclick="submitEvent()">മത്സരം ആഡ് ചെയ്യുക</button>
+        </form>
+    </div>
 </div>
 
 <script>
-    // 📋 നിങ്ങൾ നൽകിയ മത്സര ഇനങ്ങളുടെ കൃത്യമായ ലിസ്റ്റ് (വിഭാഗം തിരിച്ച്)
+    // 📋 മത്സരങ്ങളുടെ ഡാറ്റാബേസ്
     const eventData = {
         "കിഡ്സ്": ["കേട്ടെഴുത്ത്", "കളറിംഗ്", "കസേരക്കളി", "മെമ്മറി ടെസ്റ്റ്"],
         "സബ് ജൂനിയർ": ["വായന അറബി മലയാളം", "കയ്യെഴുത്ത്", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "ചിത്ര രചന", "ക്വിസ്"],
@@ -87,30 +94,67 @@
         "സീനിയർ": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ബുർദ", "ക്വിസ്", "കവിത രചന", "ചിത്ര രചന", "കാലിഗ്രാഫി", "പ്രബന്ധ രചന"]
     };
 
-    // വിഭാഗം മാറുമ്പോൾ അതിനനുസരിച്ചുള്ള മത്സരങ്ങൾ മാത്രം ലിസ്റ്റിൽ കാണിക്കാനുള്ള ഫങ്ഷൻ
-    function updateEventItems() {
-        const category = document.getElementById('student-category').value;
-        const itemSelect = document.getElementById('event-item');
+    let selectedCategory = "";
+    let selectedItem = "";
+
+    // 1. ഗ്രൂപ്പ് ക്ലിക്ക് ചെയ്യുമ്പോൾ മത്സരങ്ങൾ കാണിക്കാൻ
+    function selectCategory(cat, btn) {
+        selectedCategory = cat;
+        selectedItem = "";
         
-        itemSelect.innerHTML = '<option value="">മത്സരം തിരഞ്ഞെടുക്കുക</option>';
+        // ബട്ടൺ ആക്റ്റീവ് ആക്കാൻ
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // ഫോം തൽക്കാലം ഒളിപ്പിക്കുക
+        document.getElementById('form-container').style.display = "none";
+        document.getElementById('add-event-form').reset();
+        document.getElementById('status-message').innerHTML = '';
+
+        // മത്സരങ്ങളുടെ ലിസ്റ്റ് ഉണ്ടാക്കുക
+        const listDiv = document.getElementById('items-list');
+        listDiv.innerHTML = "";
         
-        if (category && eventData[category]) {
-            eventData[category].forEach(item => {
-                const option = document.createElement('option');
-                option.value = item;
-                option.textContent = item;
-                itemSelect.appendChild(option);
+        if (eventData[cat]) {
+            eventData[cat].forEach(item => {
+                const itemBtn = document.createElement('button');
+                itemBtn.className = "item-list-btn";
+                itemBtn.textContent = item;
+                itemBtn.onclick = function() { selectItem(item, itemBtn); };
+                listDiv.appendChild(itemBtn);
             });
+            document.getElementById('items-container').style.display = "block";
         }
     }
 
-    // 🔍 ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേര് കണ്ടെത്താൻ
-    async function fetchStudentNameForAdd() {
+    // 2. മത്സരം ക്ലിക്ക് ചെയ്യുമ്പോൾ ഫോം കാണിക്കാൻ
+    function selectItem(item, btn) {
+        selectedItem = item;
+        document.querySelectorAll('.item-list-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // ടെക്സ്റ്റ് മാറ്റുക, ഫോം കാണിക്കുക
+        document.getElementById('selected-display-text').textContent = `${selectedCategory} -> ${selectedItem}`;
+        document.getElementById('form-container').style.display = "block";
+        
+        // മുൻപ് അടിച്ച ഡാറ്റ ഉണ്ടെങ്കിൽ ക്ലിയർ ചെയ്യാൻ
+        document.getElementById('student-id').value = "";
+        document.getElementById('student-name').value = "";
+        document.getElementById('student-team').value = "";
+        document.getElementById('status-message').innerHTML = "";
+    }
+
+    // 3. ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേരും ഗ്രൂപ്പും തനിയെ വരാൻ
+    async function fetchStudentAllDetails() {
         const idInput = document.getElementById('student-id').value.trim();
         const nameInput = document.getElementById('student-name');
+        const teamInput = document.getElementById('student-team');
         const statusMsg = document.getElementById('status-message');
 
-        if (!idInput) { nameInput.value = ''; statusMsg.innerHTML = ''; return; }
+        if (!idInput) {
+            nameInput.value = ''; teamInput.value = ''; statusMsg.innerHTML = '';
+            return;
+        }
 
         try {
             const res = await fetch('/api/students');
@@ -118,10 +162,11 @@
             const student = students.find(s => s.id === idInput || s.id === Number(idInput).toString());
 
             if (student) {
-                nameInput.value = student.name;
-                statusMsg.innerHTML = `<span class="info-msg">✓ കുട്ടിയെ കണ്ടെത്തി: ${student.team || '-'} Team</span>`;
+                nameInput.value = student.name || '';
+                teamInput.value = student.team || '-';
+                statusMsg.innerHTML = `<span class="info-msg">✓ വിദ്യാർത്ഥിയെ കണ്ടെത്തി!</span>`;
             } else {
-                nameInput.value = '';
+                nameInput.value = ''; teamInput.value = '';
                 statusMsg.innerHTML = '<span class="error-msg">❌ ഈ ചെസ്സ് നമ്പറിൽ കുട്ടിയെ കണ്ടെത്തിയില്ല!</span>';
             }
         } catch (error) {
@@ -129,23 +174,23 @@
         }
     }
 
-    // സബ്മിറ്റ് ചെയ്യുമ്പോൾ
+    // സേവ് ചെയ്യുമ്പോൾ
     function submitEvent() {
         const id = document.getElementById('student-id').value;
         const name = document.getElementById('student-name').value;
-        const gender = document.getElementById('student-gender').value;
-        const category = document.getElementById('student-category').value;
-        const item = document.getElementById('event-item').value;
 
-        if (!id || !name || !gender || !category || !item) {
-            alert("ദയവായി എല്ലാ ഓപ്ഷനുകളും കൃത്യമായി തിരഞ്ഞെടുക്കുക!");
+        if (!id || !name) {
+            alert("ദയവായി സാധുവായ ചെസ്സ് നമ്പർ നൽകുക!");
             return;
         }
 
-        alert(`${name} എന്ന കുട്ടിക്ക് ${category} വിഭാഗത്തിൽ "${item}" മത്സരം ചേർത്തു!`);
+        alert(`${name} എന്ന കുട്ടിയെ "${selectedItem}" എന്ന മത്സരത്തിലേക്ക് വിജയകരമായി ചേർത്തു!`);
+        
+        // റീസെറ്റ് ചെയ്യുക
         document.getElementById('add-event-form').reset();
         document.getElementById('status-message').innerHTML = '';
-        document.getElementById('event-item').innerHTML = '<option value="">ആദ്യം വിഭാഗം തിരഞ്ഞെടുക്കുക</option>';
+        document.getElementById('form-container').style.display = "none";
+        document.querySelectorAll('.item-list-btn').forEach(b => b.classList.remove('active'));
     }
 </script>
 </body>
