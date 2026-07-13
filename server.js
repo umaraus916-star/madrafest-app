@@ -5,86 +5,56 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
-// എല്ലാ സ്റ്റാറ്റിക് ഫയലുകളും (HTML, CSS, JS) ഓട്ടോമാറ്റിക് ആയി ലോഡ് ചെയ്യാൻ ഇത് സഹായിക്കും
 app.use(express.static(__dirname));
-app.use(express.static(path.join(__dirname, 'public')));
 
-// ഫയലുകൾ കൃത്യമായി എടുക്കാനുള്ള ഫങ്ഷൻ
-const sendFileIfExists = (fileName, res) => {
-    let filePath = path.join(__dirname, fileName);
-    if (!fs.existsSync(filePath)) {
-        filePath = path.join(__dirname, 'public', fileName);
-    }
-    
-    if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
-    } else {
-        res.status(404).send(`<h3>Error 404: ${fileName} എന്ന ഫയൽ കണ്ടെത്താനായില്ല!</h3><p>നിങ്ങളുടെ ഫോൾഡറിൽ ഈ പേര് കൃത്യമാണോ എന്ന് പരിശോധിക്കുക.</p>`);
-    }
-};
+const getJsonPath = () => path.join(__dirname, 'students.json');
 
-// 🌐 എല്ലാ പ്രധാന പേജുകളുടെയും റൂട്ടുകൾ താഴെ നൽകുന്നു:
-
-app.get('/', (req, res) => sendFileIfExists('home.html', res));
-app.get('/home.html', (req, res) => sendFileIfExists('home.html', res));
-app.get('/admin.html', (req, res) => sendFileIfExists('admin.html', res));
-app.get('/judge.html', (req, res) => sendFileIfExists('judge.html', res));
-app.get('/result.html', (req, res) => sendFileIfExists('result.html', res));
-
-// 📋 കുട്ടികളുടെ ലിസ്റ്റ് എടുക്കാനുള്ള API
+// 📋 എല്ലാ പേജുകൾക്കും കുട്ടികളുടെ ലിസ്റ്റ് എടുക്കാനുള്ള പൊതുവായ API
 app.get('/api/students', (req, res) => {
-    let jsonPath = path.join(__dirname, 'students.json');
-    if (!fs.existsSync(jsonPath)) {
-        jsonPath = path.join(__dirname, 'public', 'students.json');
-    }
-    if (fs.existsSync(jsonPath)) {
-        const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-        res.json(data);
-    } else {
-        res.json([]);
-    }
+    fs.readFile(getJsonPath(), 'utf8', (err, data) => {
+        if (err) return res.status(500).json([]);
+        res.json(JSON.parse(data));
+    });
 });
 
 // ➕ പുതിയ കുട്ടിയെ ആഡ് ചെയ്യാൻ
 app.post('/api/students', (req, res) => {
-    let jsonPath = path.join(__dirname, 'students.json');
-    if (!fs.existsSync(jsonPath)) jsonPath = path.join(__dirname, 'public', 'students.json');
-    let data = fs.existsSync(jsonPath) ? JSON.parse(fs.readFileSync(jsonPath, 'utf8')) : [];
-    data.push(req.body);
-    fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
-    res.json({ message: "Student Added Successfully" });
+    fs.readFile(getJsonPath(), 'utf8', (err, data) => {
+        let students = err ? [] : JSON.parse(data);
+        students.push(req.body);
+        fs.writeFile(getJsonPath(), JSON.stringify(students, null, 2), () => {
+            res.json({ message: "Success" });
+        });
+    });
 });
 
 // 📝 കുട്ടിയുടെ വിവരങ്ങൾ തിരുത്താൻ
 app.put('/api/students/:id', (req, res) => {
-    const studentId = req.params.id;
-    let jsonPath = path.join(__dirname, 'students.json');
-    if (!fs.existsSync(jsonPath)) jsonPath = path.join(__dirname, 'public', 'students.json');
-    if (fs.existsSync(jsonPath)) {
-        let data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-        const index = data.findIndex(s => s.id === studentId);
+    fs.readFile(getJsonPath(), 'utf8', (err, data) => {
+        if (err) return res.status(500).json({ error: "Error" });
+        let students = JSON.parse(data);
+        const index = students.findIndex(s => s.id === req.params.id);
         if (index !== -1) {
-            data[index] = { ...data[index], ...req.body };
-            fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
-            return res.json({ message: "Student Updated" });
+            students[index] = { ...students[index], ...req.body };
+            fs.writeFile(getJsonPath(), JSON.stringify(students, null, 2), () => {
+                res.json({ message: "Updated" });
+            });
+        } else {
+            res.status(404).json({ error: "Not Found" });
         }
-    }
-    res.status(404).json({ error: "Not Found" });
+    });
 });
 
 // ❌ കുട്ടിയെ ഡിലീറ്റ് ചെയ്യാൻ
 app.delete('/api/students/:id', (req, res) => {
-    let jsonPath = path.join(__dirname, 'students.json');
-    if (!fs.existsSync(jsonPath)) jsonPath = path.join(__dirname, 'public', 'students.json');
-    if (fs.existsSync(jsonPath)) {
-        let data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-        data = data.filter(student => student.id !== req.params.id);
-        fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
-        res.json({ message: "Student Deleted" });
-    } else {
-        res.status(404).json({ error: "Not Found" });
-    }
+    fs.readFile(getJsonPath(), 'utf8', (err, data) => {
+        if (err) return res.status(500).json({ error: "Error" });
+        let students = JSON.parse(data);
+        students = students.filter(s => s.id !== req.params.id);
+        fs.writeFile(getJsonPath(), JSON.stringify(students, null, 2), () => {
+            res.json({ message: "Deleted" });
+        });
+    });
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
