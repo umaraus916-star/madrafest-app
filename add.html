@@ -7,7 +7,7 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f6; }
         .nav-bar { background: #343a40; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .nav-bar a { color: white; text-decoration: none; font-weight: bold; padding: 6px 15px; background: #007bff; border-radius: 4px; }
+        .nav-bar a { color: white; text-decoration: none; font-weight: bold; padding: 6px 15px; background: #28a745; border-radius: 4px; }
         .nav-title { color: white; font-weight: bold; font-size: 18px; }
         .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0px 8px 20px rgba(0,0,0,0.08); }
         h2 { color: #2c3e50; text-align: center; margin-top: 0; }
@@ -46,7 +46,7 @@
 <div class="container">
     <div class="nav-bar">
         <span class="nav-title">➕ മത്സരങ്ങൾ ചേർക്കുക</span>
-        <a href="/home.html">🏠 Home</a>
+        <a href="/result.html">🏆 Result</a>
     </div>
 
     <h2>🕌 മദ്രസ ഫെസ്റ്റ് - മത്സര രജിസ്ട്രേഷൻ</h2>
@@ -116,7 +116,6 @@
 
     function selectMadrasaGroup(groupName, btn) {
         currentSelectedGroup = groupName;
-        
         document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
@@ -129,7 +128,6 @@
         document.getElementById('events-checkbox-list').style.display = "none";
     }
 
-    // ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ സിസ്റ്റത്തിലുള്ള ഏത് കുട്ടിയെയും കണ്ടെത്തുന്നു
     async function fetchStudentNameOnly() {
         const idInput = document.getElementById('student-id').value.trim();
         const nameInput = document.getElementById('student-name');
@@ -188,7 +186,6 @@
         }
     }
 
-    // സബ്മിറ്റ് ചെയ്യുമ്പോൾ ഗ്രൂപ്പ് വിവരങ്ങളടക്കം ബാക്കെൻഡിലേക്ക് അയക്കുന്നു
     async function submitEvent() {
         const id = document.getElementById('student-id').value;
         const name = document.getElementById('student-name').value;
@@ -208,13 +205,7 @@
             return;
         }
 
-        const payload = {
-            id: id,
-            team: currentSelectedGroup, // മുകളിൽ സെലക്ട് ചെയ്ത ഗ്രൂപ്പ് ഇവിടെയാണ് സേവ് ചെയ്യുന്നത്
-            gender: gender,
-            category: category,
-            events: selectedEvents
-        };
+        const payload = { id, team: currentSelectedGroup, gender, category, events: selectedEvents };
 
         try {
             const response = await fetch('/api/register-event', {
@@ -226,9 +217,7 @@
             const result = await response.json();
 
             if (result.success) {
-                alert(`വിജയകരം!\n\n${name} എന്ന കുട്ടിയെ "${currentSelectedGroup}" ഗ്രൂപ്പിൽ ഉൾപ്പെടുത്തുകയും താഴെ പറയുന്ന മത്സരങ്ങൾ ആഡ് ചെയ്യുകയും ചെയ്തു:\n\n${selectedEvents.join(", ")}`);
-                
-                // റീസെറ്റ് ചെയ്യൽ
+                alert(`വിജയകരം!\n\n${name} എന്ന കുട്ടിയെ "${currentSelectedGroup}" ഗ്രൂപ്പിൽ ഉൾപ്പെടുത്തുകയും മത്സരങ്ങൾ ആഡ് ചെയ്യുകയും ചെയ്തു.`);
                 document.getElementById('add-event-form').reset();
                 document.getElementById('status-message').innerHTML = '';
                 document.getElementById('checkbox-label').style.display = "none";
@@ -240,7 +229,6 @@
             }
         } catch (error) {
             console.error(error);
-            alert("സേവ് ചെയ്യാൻ സാധിച്ചില്ല. നെറ്റ്‌വർക്ക് പരിശോധിക്കുക.");
         }
     }
 </script>
