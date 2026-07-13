@@ -5,24 +5,52 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+// എല്ലാ സ്റ്റാറ്റിക് ഫയലുകളും (HTML, CSS, JS) ഓട്ടോമാറ്റിക് ആയി ലോഡ് ചെയ്യാൻ ഇത് സഹായിക്കും
 app.use(express.static(__dirname));
 
-const getJsonPath = () => path.join(__dirname, 'students.json');
+// 🌐 എല്ലാ പ്രധാന പേജുകളുടെയും റൂട്ടുകൾ (Routing) താഴെ നൽകുന്നു:
 
-// 📋 എല്ലാ പേജുകൾക്കും കുട്ടികളുടെ ലിസ്റ്റ് എടുക്കാനുള്ള പൊതുവായ API
+// 1. ഹോം പേജ് (Home Page)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'home.html'));
+});
+app.get('/home.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'home.html'));
+});
+
+// 2. അഡ്മിൻ പാനൽ (Admin Panel)
+app.get('/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// 3. ജഡ്ജിങ് പാനൽ (Judge Panel)
+app.get('/judge.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'judge.html'));
+});
+
+// 4. റിസൾട്ട് ബോർഡ് (Result Board)
+app.get('/result.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'result.html'));
+});
+
+
+// 📋 കുട്ടികളുടെ ലിസ്റ്റ് എടുക്കാനുള്ള API
 app.get('/api/students', (req, res) => {
-    fs.readFile(getJsonPath(), 'utf8', (err, data) => {
-        if (err) return res.status(500).json([]);
+    const jsonPath = path.join(__dirname, 'students.json');
+    fs.readFile(jsonPath, 'utf8', (err, data) => {
+        if (err) return res.json([]);
         res.json(JSON.parse(data));
     });
 });
 
 // ➕ പുതിയ കുട്ടിയെ ആഡ് ചെയ്യാൻ
 app.post('/api/students', (req, res) => {
-    fs.readFile(getJsonPath(), 'utf8', (err, data) => {
+    const jsonPath = path.join(__dirname, 'students.json');
+    fs.readFile(jsonPath, 'utf8', (err, data) => {
         let students = err ? [] : JSON.parse(data);
         students.push(req.body);
-        fs.writeFile(getJsonPath(), JSON.stringify(students, null, 2), () => {
+        fs.writeFile(jsonPath, JSON.stringify(students, null, 2), () => {
             res.json({ message: "Success" });
         });
     });
@@ -30,13 +58,14 @@ app.post('/api/students', (req, res) => {
 
 // 📝 കുട്ടിയുടെ വിവരങ്ങൾ തിരുത്താൻ
 app.put('/api/students/:id', (req, res) => {
-    fs.readFile(getJsonPath(), 'utf8', (err, data) => {
+    const jsonPath = path.join(__dirname, 'students.json');
+    fs.readFile(jsonPath, 'utf8', (err, data) => {
         if (err) return res.status(500).json({ error: "Error" });
         let students = JSON.parse(data);
         const index = students.findIndex(s => s.id === req.params.id);
         if (index !== -1) {
             students[index] = { ...students[index], ...req.body };
-            fs.writeFile(getJsonPath(), JSON.stringify(students, null, 2), () => {
+            fs.writeFile(jsonPath, JSON.stringify(students, null, 2), () => {
                 res.json({ message: "Updated" });
             });
         } else {
@@ -47,11 +76,12 @@ app.put('/api/students/:id', (req, res) => {
 
 // ❌ കുട്ടിയെ ഡിലീറ്റ് ചെയ്യാൻ
 app.delete('/api/students/:id', (req, res) => {
-    fs.readFile(getJsonPath(), 'utf8', (err, data) => {
+    const jsonPath = path.join(__dirname, 'students.json');
+    fs.readFile(jsonPath, 'utf8', (err, data) => {
         if (err) return res.status(500).json({ error: "Error" });
         let students = JSON.parse(data);
         students = students.filter(s => s.id !== req.params.id);
-        fs.writeFile(getJsonPath(), JSON.stringify(students, null, 2), () => {
+        fs.writeFile(jsonPath, JSON.stringify(students, null, 2), () => {
             res.json({ message: "Deleted" });
         });
     });
