@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Student Details</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; direction: ltr; }
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
         .form-container { background: white; max-width: 450px; margin: 20px auto; padding: 25px; border-radius: 10px; box-shadow: 0px 0px 15px rgba(0,0,0,0.1); text-align: right; }
         h2 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
         label { font-weight: bold; display: block; margin-top: 10px; color: #555; text-align: right; }
         input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; text-align: right; }
         input { text-align: left; }
         #chestNumber { text-align: left; }
+        #name { background-color: #eee; cursor: not-allowed; text-align: left; }
         button { background-color: #2ecc71; color: white; border: none; font-weight: bold; cursor: pointer; text-align: center; margin-top: 15px; }
         button:hover { background-color: #27ae60; }
         .msg { font-weight: bold; margin-top: 15px; text-align: center; }
@@ -24,10 +25,10 @@
     <form id="studentForm">
         
         <label>ചെസ്റ്റ് നമ്പർ:</label>
-        <input type="text" id="chestNumber" placeholder="Chest Number" required>
+        <input type="text" id="chestNumber" placeholder="Chest Number അടിക്കുക" oninput="autoFillName()" required>
         
-        <label>കുട്ടിയുടെ പേര്:</label>
-        <input type="text" id="name" placeholder="Name" required>
+        <label>കുട്ടിയുടെ പേര് (തനിയെ വരും):</label>
+        <input type="text" id="name" placeholder="Name" readonly required>
 
         <label>വിഭാഗം (Category):</label>
         <select id="category" onchange="updateItems()" required>
@@ -64,6 +65,32 @@
 </div>
 
 <script>
+    let studentDatabase = [];
+
+    // സെർവറിൽ നിന്ന് 86 കുട്ടികളുടെ ലിസ്റ്റ് ലോഡ് ചെയ്യുന്നു
+    async function loadDatabase() {
+        const response = await fetch('/api/db-students');
+        if(response.ok) {
+            studentDatabase = await response.json();
+        }
+    }
+    loadDatabase();
+
+    // ചെസ്റ്റ് നമ്പർ അടിക്കുമ്പോൾ പേര് തനിയെ പൂരിപ്പിക്കുന്ന ഫങ്ക്ഷൻ
+    function autoFillName() {
+        const chest = document.getElementById('chestNumber').value.trim();
+        const nameInput = document.getElementById('name');
+        
+        const found = studentDatabase.find(s => s.chestNumber === chest);
+        if (found) {
+            nameInput.value = found.name;
+            nameInput.style.borderColor = "green";
+        } else {
+            nameInput.value = "";
+            nameInput.style.borderColor = "#ccc";
+        }
+    }
+
     const itemsData = {
         "Senior": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ബുർദ", "ക്വിസ്", "കവിത രചന", "ചിത്ര രചന", "കാലിഗ്രാഫി", "പ്രബന്ധ രചന"],
         "Junior": ["മാലപ്പാട്ട്", "മൗലീദ് പാരായണം", "ചിത്ര രചന", "ക്വിസ്", "കഥാ രചന", "കേട്ടെഴുത്ത് (അറബി മലയാളം)", "വായന അറബി"],
@@ -98,10 +125,14 @@
         const team = document.getElementById('team').value;
         const messageDiv = document.getElementById('message');
 
+        if(!name) {
+            alert("ഈ ചെസ്റ്റ് നമ്പറിൽ കുട്ടിയെ കണ്ടെത്തിയിട്ടില്ല!");
+            return;
+        }
+
         messageDiv.innerText = "Saving...";
         messageDiv.style.color = "blue";
 
-        // മത്സരയിനത്തോടൊപ്പം കാറ്റഗറിയും ജെൻഡറും കൂടി ചേർക്കുന്നു (ഉദാഹരണത്തിന്: മാലപ്പാട്ട് - Senior (Boys))
         const fullItemName = `${item} - ${category} (${gender})`;
 
         const response = await fetch('/api/add-student', {
@@ -113,7 +144,7 @@
         const result = await response.json();
 
         if (result.success) {
-            messageDiv.innerText = "വിജയകരമായി സേവ് ആയി! ✅";
+            messageDiv.innerText = "വിജയകരമായി രജിസ്റ്റർ ചെയ്തു! ✅";
             messageDiv.style.color = "green";
             document.getElementById('studentForm').reset();
             document.getElementById('item').innerHTML = '<option value="">ആദ്യം വിഭാഗം സെലക്ട് ചെയ്യുക</option>';
