@@ -10,24 +10,20 @@ app.use(express.static('public'));
 const DATA_FILE = path.join(__dirname, 'registered_students.json');
 const DB_FILE = path.join(__dirname, 'students.json');
 
-// രജിസ്റ്റർ ചെയ്ത കുട്ടികളുടെ ഡാറ്റ എടുക്കാൻ
 function getRegisteredStudents() {
     if (!fs.existsSync(DATA_FILE)) return [];
     return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
 }
 
-// മാസ്റ്റർ ഡാറ്റാബേസ് (86 കുട്ടികളുടെ ലിസ്റ്റ്) എടുക്കാൻ
 function getDbStudents() {
     if (!fs.existsSync(DB_FILE)) return [];
     return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
 }
 
-// API: മാസ്റ്റർ ലിസ്റ്റ് ഫോമിലേക്ക് നൽകാൻ
 app.get('/api/db-students', (req, res) => {
     res.json(getDbStudents());
 });
 
-// API: പുതിയ മത്സരത്തിലേക്ക് കുട്ടിയെ രജിസ്റ്റർ ചെയ്യാൻ
 app.post('/api/add-student', (req, res) => {
     const { chestNumber, name, item, team } = req.body;
     let students = getRegisteredStudents();
@@ -38,12 +34,10 @@ app.post('/api/add-student', (req, res) => {
     res.json({ success: true });
 });
 
-// API: റിസൾട്ടുകൾ കാണിക്കാൻ
 app.get('/api/results', (req, res) => {
     res.json(getRegisteredStudents());
 });
 
-// API: ജഡ്ജിമാർക്ക് മാർക്ക് രേഖപ്പെടുത്താൻ
 app.post('/api/submit-mark', (req, res) => {
     const { chestNumber, mark } = req.body;
     let students = getRegisteredStudents();
@@ -60,6 +54,34 @@ app.post('/api/submit-mark', (req, res) => {
     if (!found) {
         return res.status(404).json({ success: false, error: "ഈ കുട്ടി മത്സരത്തിൽ രജിസ്റ്റർ ചെയ്തിട്ടില്ല!" });
     }
+
+    fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));
+    res.json({ success: true });
+});
+
+// API: വിവരങ്ങൾ എഡിറ്റ് ചെയ്യാൻ (Edit)
+app.post('/api/edit-student', (req, res) => {
+    const { chestNumber, item, team, mark } = req.body;
+    let students = getRegisteredStudents();
+
+    students = students.map(s => {
+        if (s.chestNumber === chestNumber && s.item === item) {
+            s.team = team;
+            s.mark = parseInt(mark) || 0;
+        }
+        return s;
+    });
+
+    fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));
+    res.json({ success: true });
+});
+
+// API: വിവരങ്ങൾ ഡിലീറ്റ് ചെയ്യാൻ (Delete)
+app.post('/api/delete-student', (req, res) => {
+    const { chestNumber, item } = req.body;
+    let students = getRegisteredStudents();
+
+    students = students.filter(s => !(s.chestNumber === chestNumber && s.item === item));
 
     fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));
     res.json({ success: true });

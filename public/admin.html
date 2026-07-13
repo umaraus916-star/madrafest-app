@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; text-align: center; }
+        .container { background: white; max-width: 800px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #2c3e50; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .btn-edit { background-color: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; }
+        .btn-delete { background-color: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; margin-left: 5px; }
+        
+        /* Edit Modal Form */
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0,0,0,0.3); z-index: 10; width: 90%; max-width: 400px; text-align: right; }
+        .modal input, .modal select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; text-align: right; }
+        .modal input[type="text"] { text-align: left; }
+        .modal button { width: 48%; padding: 10px; font-weight: bold; border-radius: 5px; cursor: pointer; border: none; }
+        .btn-save { background-color: #2ecc71; color: white; }
+        .btn-cancel { background-color: #7f8c8d; color: white; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⚙️ അഡ്മിൻ കൺട്രോൾ പാനൽ (Edit/Delete)</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Chest No</th>
+                <th>Name</th>
+                <th>Item / Category</th>
+                <th>Team</th>
+                <th>Mark</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="adminTable">
+            </tbody>
+    </table>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="editModal">
+    <h3 style="text-align:center;">വിവരങ്ങൾ തിരുത്തുക</h3>
+    <input type="hidden" id="editIndex">
+    
+    <label>ചെസ്റ്റ് നമ്പർ:</label>
+    <input type="text" id="editChest" style="background-color:#eee;" readonly>
+    
+    <label>പേര്:</label>
+    <input type="text" id="editName" style="background-color:#eee;" readonly>
+
+    <label>ടീം (Team):</label>
+    <select id="editTeam">
+        <option value="Badr">Badr</option>
+        <option value="Hira">Hira</option>
+        <option value="Furqan">Furqan</option>
+    </select>
+    
+    <label>മാർക്ക്:</label>
+    <input type="number" id="editMark">
+
+    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-save" onclick="saveEdit()">Save Changes</button>
+    </div>
+</div>
+
+<script>
+    let registeredStudents = [];
+
+    async function loadAdminData() {
+        const response = await fetch('/api/results');
+        registeredStudents = await response.json();
+        const tableBody = document.getElementById('adminTable');
+        tableBody.innerHTML = '';
+
+        registeredStudents.forEach((student, index) => {
+            const row = `<tr>
+                <td>${student.chestNumber}</td>
+                <td>${student.name}</td>
+                <td>${student.item}</td>
+                <td>${student.team}</td>
+                <td>${student.mark}</td>
+                <td>
+                    <button class="btn-edit" onclick="openEditModal(${index})">Edit</button>
+                    <button class="btn-delete" onclick="deleteStudent(${index})">Delete</button>
+                </td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function openEditModal(index) {
+        const student = registeredStudents[index];
+        document.getElementById('editIndex').value = index;
+        document.getElementById('editChest').value = student.chestNumber;
+        document.getElementById('editName').value = student.name;
+        document.getElementById('editTeam').value = student.team;
+        document.getElementById('editMark').value = student.mark;
+
+        document.getElementById('editModal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+    }
+
+    async function saveEdit() {
+        const index = document.getElementById('editIndex').value;
+        const team = document.getElementById('editTeam').value;
+        const mark = document.getElementById('editMark').value;
+        const student = registeredStudents[index];
+
+        const response = await fetch('/api/edit-student', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chestNumber: student.chestNumber, item: student.item, team, mark })
+        });
+
+        const result = await response.json();
+        if(result.success) {
+            closeModal();
+            loadAdminData();
+        } else {
+            alert("Error updating details");
+        }
+    }
+
+    async function deleteStudent(index) {
+        if(!confirm("ഈ കുട്ടിയുടെ ഈ മത്സരത്തിലുള്ള രജിസ്ട്രേഷൻ ഡിലീറ്റ് ചെയ്യണോ?")) return;
+        const student = registeredStudents[index];
+
+        const response = await fetch('/api/delete-student', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chestNumber: student.chestNumber, item: student.item })
+        });
+
+        const result = await response.json();
+        if(result.success) {
+            loadAdminData();
+        } else {
+            alert("Error deleting student");
+        }
+    }
+
+    loadAdminData();
+</script>
+
+</body>
+</html>
