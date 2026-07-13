@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Madrafest Admin Panel</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <title>Madrafest Admin - Add/Delete</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
-        .container { background: white; max-width: 950px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
-        .top-btns { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .btn { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
-        .add-btn { background: #27ae60; color: white; }
-        .pdf-btn { background: #e74c3c; color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        .container { background: white; max-width: 900px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        .form-section { background: #eef2f3; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        input, select { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        button { padding: 8px 15px; cursor: pointer; border-radius: 4px; border: none; background: #27ae60; color: white; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
         th { background-color: #34495e; color: white; }
-        .del-btn { background: #c0392b; color: white; padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; }
+        .del-btn { background: #c0392b; color: white; }
     </style>
 </head>
 <body>
@@ -24,46 +21,50 @@
 <div class="container">
     <h1>⚙️ അഡ്മിൻ കൺട്രോൾ പാനൽ</h1>
     
-    <div class="top-btns">
-        <a href="add.html" class="btn add-btn">+ പുതിയ കുട്ടിയെ ചേർക്കുക</a>
-        <button class="btn pdf-btn" onclick="generatePDF('call_list')">📄 കോൾ ലിസ്റ്റ് (PDF)</button>
-        <button class="btn pdf-btn" onclick="generatePDF('winners_list')">🏆 വിജയികൾ (PDF)</button>
+    <div class="form-section">
+        <h3>➕ പുതിയ കുട്ടിയെ ചേർക്കുക</h3>
+        <input type="text" id="chestNumber" placeholder="Chest Number">
+        <input type="text" id="name" placeholder="Name">
+        <select id="team"><option value="Badr">Badr</option><option value="Hira">Hira</option><option value="Furqan">Furqan</option></select>
+        <input type="text" id="item" placeholder="Item Name">
+        <button onclick="addStudent()">Add Student</button>
     </div>
 
-    <h3>📋 ആകെ രജിസ്റ്റർ ചെയ്ത കുട്ടികൾ (${allDataLength} പേർ)</h3>
+    <h3>📋 ആകെ രജിസ്റ്റർ ചെയ്ത കുട്ടികൾ</h3>
     <table id="adminTable">
-        <thead>
-            <tr>
-                <th>Chest No</th>
-                <th>Name</th>
-                <th>Team</th>
-                <th>Item</th>
-                <th>Action</th>
-            </tr>
-        </thead>
+        <thead><tr><th>Chest No</th><th>Name</th><th>Team</th><th>Item</th><th>Action</th></tr></thead>
         <tbody id="adminTableBody"></tbody>
     </table>
 </div>
 
 <script>
-    let allData = [];
-
     async function loadAdminData() {
         const response = await fetch('/api/results');
-        allData = await response.json();
-        
+        const data = await response.json();
         const tbody = document.getElementById('adminTableBody');
         tbody.innerHTML = '';
-        
-        allData.forEach(s => {
+        data.forEach(s => {
             tbody.innerHTML += `<tr>
-                <td>${s.chestNumber}</td>
-                <td>${s.name}</td>
-                <td>${s.team}</td>
-                <td>${s.item}</td>
+                <td>${s.chestNumber}</td><td>${s.name}</td><td>${s.team}</td><td>${s.item}</td>
                 <td><button class="del-btn" onclick="deleteEntry('${s.chestNumber}', '${s.item}')">Delete</button></td>
             </tr>`;
         });
+    }
+
+    async function addStudent() {
+        const student = {
+            chestNumber: document.getElementById('chestNumber').value,
+            name: document.getElementById('name').value,
+            team: document.getElementById('team').value,
+            item: document.getElementById('item').value
+        };
+        await fetch('/api/add', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(student)
+        });
+        alert('കുട്ടിയെ വിജയകരമായി ചേർത്തു!');
+        loadAdminData();
     }
 
     async function deleteEntry(chestNumber, item) {
