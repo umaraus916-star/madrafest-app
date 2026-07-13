@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MadraFest Pro - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-100 p-4 min-h-screen flex justify-center items-start">
+
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden p-4 flex flex-col gap-4">
+        
+        <div class="bg-indigo-600 text-white rounded-2xl p-6 shadow-md">
+            <span class="text-xs uppercase tracking-wider text-indigo-200 font-semibold block mb-1">Admin Dashboard</span>
+            <h1 class="text-2xl font-bold mb-6">Your fest at a glance</h1>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-indigo-500/40 p-3 rounded-xl">
+                    <span class="text-xs text-indigo-200 block">STUDENTS</span>
+                    <span class="text-2xl font-black block mt-1">3</span>
+                </div>
+                <div class="bg-indigo-500/40 p-3 rounded-xl">
+                    <span class="text-xs text-indigo-200 block">PUBLISHED</span>
+                    <span class="text-2xl font-black block mt-1">Live</span>
+                </div>
+            </div>
+
+            <h2 class="text-xs uppercase tracking-wider text-indigo-200 mb-3 font-bold">Team Standings</h2>
+            <div class="flex flex-col gap-2" id="team-list">
+                </div>
+        </div>
+
+        <div class="border border-slate-100 rounded-2xl p-4 bg-slate-50">
+            <span class="text-xs uppercase tracking-wider text-indigo-600 font-bold block mb-2">Live Results & Grade</span>
+            <div id="live-results" class="flex flex-col gap-2">
+                <p class="text-sm text-slate-500 text-center py-2">Loading live data...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // മാർക്കിനെ ഗ്രേഡ് ആക്കി മാറ്റാനുള്ള ഫംഗ്ഷൻ
+        function calculateGrade(mark) {
+            if (mark >= 45) return { name: 'A+', color: 'bg-orange-500 text-white' };
+            if (mark >= 40) return { name: 'A', color: 'bg-indigo-500 text-white' };
+            if (mark >= 35) return { name: 'B', color: 'bg-purple-500 text-white' };
+            if (mark >= 30) return { name: 'C', color: 'bg-slate-400 text-white' };
+            return { name: 'No Grade', color: 'bg-slate-200 text-slate-500' };
+        }
+
+        async function fetchLiveResults() {
+            try {
+                const response = await fetch('/api/results');
+                const data = await response.json();
+                
+                // 1. റിസൾട്ട് ലിസ്റ്റ് അപ്‌ഡേറ്റ് ചെയ്യുക
+                const container = document.getElementById('live-results');
+                container.innerHTML = '';
+                
+                // ടീം വൈസ് പോയിന്റ് കൂട്ടാൻ
+                let teamPoints = { Furqan: 0, Hira: 0, Badr: 0 };
+
+                data.forEach(student => {
+                    const grade = calculateGrade(student.mark);
+                    
+                    // ഗ്രേഡ് അനുസരിച്ച് ടീമിന് പോയിന്റ് നൽകുന്നു (A+=5, A=3, B=1)
+                    if(grade.name === 'A+') teamPoints[student.team] += 5;
+                    else if(grade.name === 'A') teamPoints[student.team] += 3;
+                    else if(grade.name === 'B') teamPoints[student.team] += 1;
+
+                    // വാട്സാപ്പിലേക്ക് അയക്കാനുള്ള മെസ്സേജ് ടെക്സ്റ്റ്
+                    const shareText = encodeURIComponent(`🏆 *MadraFest Pro Result* 🏆\n\n👤 പേര്: ${student.name}\n🔢 ചെസ്റ്റ് നമ്പർ: ${student.chestNumber}\n🎪 ടീം: ${student.team}\n🎯 മാർക്ക്: ${student.mark}/50\n🎖️ ഗ്രേഡ്: ${grade.name}\n\nതത്സമയ ഫലങ്ങൾ അറിയാൻ സന്ദർശിക്കുക!`);
+
+                    container.innerHTML += `
+                        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200/60 flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs font-bold text-indigo-500 mr-1">#${student.chestNumber}</span>
+                                    <span class="font-semibold text-slate-700 text-sm">${student.name} (${student.team})</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-slate-100 px-2 py-0.5 rounded text-xs text-slate-600 font-bold">${student.mark} M</span>
+                                    <span class="${grade.color} px-2 py-0.5 rounded text-xs font-black min-w-[28px] text-center">${grade.name}</span>
+                                </div>
+                            </div>
+                            <a href="https://api.whatsapp.com/send?text=${shareText}" target="_blank" class="text-center bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1.5 rounded-lg transition mt-1 block">
+                                🟢 WhatsApp Share
+                            </a>
+                        </div>
+                    `;
+                });
+
+                // 2. ടീം സ്റ്റാൻഡിംഗ്സ് അപ്‌ഡേറ്റ് ചെയ്യുക
+                const teamContainer = document.getElementById('team-list');
+                teamContainer.innerHTML = '';
+                
+                // പോയിന്റ് കൂടുതൽ ഉള്ളത് മുകളിൽ വരാൻ സോർട്ട് ചെയ്യുന്നു
+                const sortedTeams = Object.entries(teamPoints).sort((a, b) => b[1] - a[1]);
+                
+                sortedTeams.forEach(([teamName, points], index) => {
+                    const colors = ['bg-amber-400', 'bg-purple-300', 'bg-blue-300'];
+                    teamContainer.innerHTML += `
+                        <div class="bg-indigo-700/50 flex justify-between items-center px-4 py-2 rounded-xl text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="text-indigo-300">#${index + 1}</span>
+                                <span class="w-2 h-2 rounded-full ${colors[index] || 'bg-slate-300'}"></span>
+                                <span>${teamName}</span>
+                            </div>
+                            <span class="font-bold">${points} Pts</span>
+                        </div>
+                    `;
+                });
+
+            } catch (error) {
+                console.error("Error loading data:", error);
+            }
+        }
+        
+        // ഓരോ 5 സെക്കൻഡിലും ലൈവ് ആയി റിഫ്രഷ് ചെയ്യുക
+        fetchLiveResults();
+        setInterval(fetchLiveResults, 5000);
+    </script>
+</body>
+</html>

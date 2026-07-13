@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MadraFest Pro - Judge Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-100 p-4 min-h-screen flex justify-center items-start">
+
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 flex flex-col gap-4">
+        <div class="border-b border-slate-100 pb-3">
+            <span class="text-xs uppercase tracking-wider text-indigo-600 font-bold block mb-1">Mobile Mark Entry</span>
+            <h1 class="text-2xl font-bold text-slate-800">Enter Student Marks</h1>
+        </div>
+
+        <form id="markForm" class="flex flex-col gap-4">
+            <div>
+                <label class="text-sm font-semibold text-slate-600 block mb-1">ചെസ്റ്റ് നമ്പർ (Chest Number)</label>
+                <input type="text" id="chestNumber" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 font-bold focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="text-sm font-semibold text-slate-600 block mb-1">മാർക്ക് (Mark - Out of 50)</label>
+                <input type="number" id="mark" max="50" min="0" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-indigo-600 font-black text-xl focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-md mt-2">
+                Save Marks
+            </button>
+        </form>
+        
+        <p id="message" class="text-center text-sm font-medium hidden"></p>
+    </div>
+
+    <script>
+        document.getElementById('markForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const chestNumber = document.getElementById('chestNumber').value;
+            const mark = parseInt(document.getElementById('mark').value);
+            const messageEl = document.getElementById('message');
+
+            try {
+                const response = await fetch('/api/submit-mark', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chestNumber, mark })
+                });
+                
+                const result = await response.json();
+                
+                if(response.ok) {
+                    messageEl.textContent = "✅ മാർക്ക് വിജയകരമായി രേഖപ്പെടുത്തി!";
+                    messageEl.className = "text-center text-sm font-medium text-green-600 block";
+                    document.getElementById('markForm').reset();
+                } else {
+                    messageEl.textContent = "❌ " + result.error;
+                    messageEl.className = "text-center text-sm font-medium text-red-600 block";
+                }
+            } catch (error) {
+                messageEl.textContent = "❌ സെർവർ എറർ!";
+                messageEl.className = "text-center text-sm font-medium text-red-600 block";
+            }
+        });
+    </script>
+</body>
+</html>
