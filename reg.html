@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>മദ്രസ ഫെസ്റ്റ് - മത്സര രജിസ്ട്രേഷൻ</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; background: #28a745; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        button:hover { background: #218838; }
+        .info-msg { color: #28a745; font-weight: bold; margin-top: 5px; }
+        .error-msg { color: #dc3545; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📝 മദ്രസ ഫെസ്റ്റ് - മത്സര രജിസ്ട്രേഷൻ പാനൽ</h2>
+    <hr>
+    
+    <form id="reg-form">
+        <div class="form-group">
+            <label>Chess No / Reg No:</label>
+            <input type="text" id="student-id" placeholder="ഉദാഹരണത്തിന്: 78" oninput="fetchStudentNameForReg()">
+            <div id="status-message"></div>
+        </div>
+
+        <div class="form-group">
+            <label>വിദ്യാർത്ഥിയുടെ പേര് (Auto-Fill):</label>
+            <input type="text" id="student-name" placeholder="ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേര് ഇവിടെ വരും" readonly style="background-color: #e9ecef; font-weight: bold; color: #495057;">
+        </div>
+
+        <div class="form-group">
+            <label>മത്സര ഇനം തിരഞ്ഞെടുക്കുക (Item):</label>
+            <input type="text" id="event-item" placeholder="ഉദാഹരണത്തിന്: പ്രസംഗം, ഖിറാഅത്ത്">
+        </div>
+
+        <button type="button" onclick="submitRegistration()">മത്സരം രജിസ്റ്റർ ചെയ്യുക</button>
+    </form>
+</div>
+
+<script>
+    // 🔍 ചെസ്സ് നമ്പർ അടിക്കുമ്പോൾ പേര് തനിയെ ലോഡ് ചെയ്യാനുള്ള ഫങ്ഷൻ
+    async function fetchStudentNameForReg() {
+        const idInput = document.getElementById('student-id').value.trim();
+        const nameInput = document.getElementById('student-name');
+        const statusMsg = document.getElementById('status-message');
+
+        if (!idInput) {
+            nameInput.value = '';
+            statusMsg.innerHTML = '';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/students');
+            const students = await res.json();
+
+            // ടൈപ്പ് ചെയ്ത ഐഡിയുള്ള കുട്ടിയെ കണ്ടെത്തുന്നു
+            const student = students.find(s => s.id === idInput);
+
+            if (student) {
+                nameInput.value = student.name;
+                statusMsg.innerHTML = `<span class="info-msg">✓ കുട്ടിയെ കണ്ടെത്തി: ${student.team || ''} Team</span>`;
+            } else {
+                nameInput.value = '';
+                statusMsg.innerHTML = '<span class="error-msg">❌ ഈ ചെസ്സ് നമ്പറിൽ കുട്ടിയെ കണ്ടെത്തിയില്ല!</span>';
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    }
+
+    // രജിസ്ട്രേഷൻ സബ്മിറ്റ് ചെയ്യുമ്പോൾ
+    function submitRegistration() {
+        const id = document.getElementById('student-id').value;
+        const name = document.getElementById('student-name').value;
+        const item = document.getElementById('event-item').value;
+
+        if (!id || !name || !item) {
+            alert("എല്ലാ വിവരങ്ങളും കൃത്യമായി പൂരിപ്പിക്കുക!");
+            return;
+        }
+
+        alert(`${name} എന്ന കുട്ടിയെ ${item} മത്സരത്തിലേക്ക് വിജയകരമായി രജിസ്റ്റർ ചെയ്തു!`);
+        document.getElementById('reg-form').reset();
+        document.getElementById('status-message').innerHTML = '';
+    }
+</script>
+
+</body>
+</html>
