@@ -207,23 +207,34 @@ async function updatePassword() {
         }
     }
 
-    function verifyRoleAccess() {
-        const role = document.getElementById('role-select').value;
-        const pass = document.getElementById('role-pass').value;
-        
-        if(!pass) { alert("ദയവായി പാസ്‌വേഡ് ടൈപ്പ് ചെയ്യുക!"); return; }
-        
-        // താൽക്കാലിക സുരക്ഷാ പരിശോധന (നിങ്ങൾക്ക് ഇഷ്ടമുള്ള പാസ്‌വേഡ് മാറ്റാം)
-        if(role === 'admin' && pass === 'admin123') {
-            window.location.href = '/admin.html';
-        } else if(role === 'judge' && pass === 'judge123') {
-            window.location.href = '/judge.html';
-        } else if(role === 'staff' && pass === 'staff123') {
-            window.location.href = '/add.html';
-        } else {
-            alert("തെറ്റായ പാസ്‌വേഡ് അല്ലെങ്കിൽ അനുമതി നിഷേധിക്കപ്പെട്ടു!");
-        }
+ async function verifyRoleAccess() {
+    const role = document.getElementById('role-select').value;
+    const password = document.getElementById('role-pass').value.trim();
+    
+    if(!password) {
+        alert("ദയവായി പാസ്‌വേഡ് ടൈപ്പ് ചെയ്യുക!");
+        return;
     }
+    
+    try {
+        // പുതിയ പാസ്‌വേഡ് സെർവറുമായി ഒത്തുനോക്കുന്നു
+        const response = await fetch('/api/verify-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role, password })
+        });
+        
+        const result = await response.json();
+        if(result.success) {
+            alert("🔓 പ്രവേശനം അനുവദിച്ചിരിക്കുന്നു!");
+            // ലോഗിൻ വിജയിച്ചാൽ ചെയ്യേണ്ട കാര്യങ്ങൾ ഇവിടെ നൽകാം (ഉദാഹരണത്തിന് പാനൽ തുറക്കുക)
+        } else {
+            alert("🛑 തെറ്റായ പാസ്‌വേഡ്!");
+        }
+    } catch (err) {
+        alert("സെർവറുമായി ബന്ധിപ്പിക്കുന്നതിൽ പരാജയം!");
+    }
+}
 </script>
 </body>
 </html>
