@@ -207,7 +207,7 @@ async function updatePassword() {
         }
     }
 
- async function verifyRoleAccess() {
+async function verifyRoleAccess() {
     const role = document.getElementById('role-select').value;
     const password = document.getElementById('role-pass').value.trim();
     
@@ -227,17 +227,29 @@ async function updatePassword() {
         if(result.success) {
             alert("🔓 പ്രവേശനം അനുവദിച്ചിരിക്കുന്നു!");
             
-            // 🟢 വിജയിച്ചാൽ പഴയതുപോലെ പാനലുകൾ തുറക്കാനുള്ള ഭാഗം:
-            // ലോഗിൻ ബോക്സ് മറക്കുന്നു
-            document.getElementById('role-access-card').style.display = 'none';
+            // 🟢 നിങ്ങളുടെ ലോഗിൻ ഫോം ഉള്ള ഡിവിഷൻ (Div) ഒളിപ്പിക്കുന്നു
+            // നിങ്ങളുടെ പഴയ കോഡിലെ ലോഗിൻ കാർഡിന്റെ യഥാർത്ഥ ഐഡി താഴെ നൽകുക
+            const loginCard = document.getElementById('role-access-card') || document.querySelector('.card');
+            if (loginCard) loginCard.style.display = 'none';
             
-            // അതത് റോളുകളുടെ പാനലുകൾ കാണിക്കുന്നു
-            if (role === 'admin') {
-                document.getElementById('admin-panel').style.display = 'block';
-            } else if (role === 'staff') {
-                document.getElementById('staff-panel').style.display = 'block';
-            } else if (role === 'judge') {
-                document.getElementById('judge-panel').style.display = 'block';
+            // 🟢 അതത് റോളുകൾക്ക് അനുസരിച്ചുള്ള പാനലുകൾ കാണിക്കുന്നു
+            // (നിങ്ങളുടെ വെബ്‌സൈറ്റിലെ ഐഡികളുമായി ഇത് ഒത്തുപോകുന്നുവെന്ന് ഉറപ്പാക്കുക)
+            const adminPanel = document.getElementById('admin-panel') || document.getElementById('admin-section') || document.getElementById('adminDiv');
+            const staffPanel = document.getElementById('staff-panel') || document.getElementById('staff-section') || document.getElementById('staffDiv');
+            const judgePanel = document.getElementById('judge-panel') || document.getElementById('judge-section') || document.getElementById('judgeDiv');
+            
+            // എല്ലാം ആദ്യം മറയ്ക്കുന്നു
+            if(adminPanel) adminPanel.style.display = 'none';
+            if(staffPanel) staffPanel.style.display = 'none';
+            if(judgePanel) judgePanel.style.display = 'none';
+            
+            // ലോഗിൻ ചെയ്ത റോളിന് അനുസരിച്ച് പാനൽ ഓൺ ചെയ്യുന്നു
+            if (role === 'admin' && adminPanel) {
+                adminPanel.style.display = 'block';
+            } else if (role === 'staff' && staffPanel) {
+                staffPanel.style.display = 'block';
+            } else if (role === 'judge' && judgePanel) {
+                judgePanel.style.display = 'block';
             }
             
         } else {
@@ -247,6 +259,7 @@ async function updatePassword() {
         alert("സെർവറുമായി ബന്ധിപ്പിക്കുന്നതിൽ പരാജയം!");
     }
 }
+
 </script>
 </body>
 </html>
