@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>മദ്രസ ഫെസ്റ്റ് - റിപ്പോർട്ട് & എക്സ്പോർട്ട് പാനൽ</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f6; }
+        .container { max-width: 850px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0px 8px 20px rgba(0,0,0,0.06); }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; background: #6f42c1; color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 25px; }
+        .nav-bar a { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 5px; }
+        
+        h2 { color: #2c3e50; margin-top: 0; }
+        .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .card-title { font-size: 18px; font-weight: bold; color: #4a148c; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        
+        .flex-box { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        select, input, button { padding: 10px 15px; font-size: 15px; border-radius: 6px; border: 1px solid #cbd5e1; }
+        button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .btn-pdf { background: #dc3545; }
+        .btn-pdf:hover { background: #bd2130; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
+        th { background-color: #f8fafc; color: #334155; }
+
+        /* പ്രിന്റ് ചെയ്യുമ്പോൾ ടേബിൾ മാത്രം വരാൻ */
+        @media print {
+            body { background: white; padding: 0; }
+            .nav-bar, .card, h2, p, hr { display: none !important; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            table { width: 100%; border: 1px solid black; }
+            th, td { border: 1px solid black; padding: 8px; font-size: 14px; color: black; }
+            .print-header { display: block !important; text-align: center; margin-bottom: 20px; }
+        }
+        .print-header { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav-bar">
+        <span style="font-weight:bold; font-size:18px;">📋 Reports & Security Panel</span>
+        <a href="/">🏠 Home</a>
+    </div>
+
+    <h2>📊 റിപ്പോർട്ടുകളും റോൾ സുരക്ഷയും</h2>
+    <p>വിദ്യാർത്ഥികളുടെ കോൾ ലിസ്റ്റുകൾ, മാർക്ക് ഷീറ്റുകൾ എന്നിവ ഇവിടെ നിന്നും നോക്കാനും PDF ആയി പ്രിന്റ് ചെയ്യാനും സാധിക്കും.</p>
+
+    <div class="card">
+        <div class="card-title">📄 റിപ്പോർട്ടുകളും പി.ഡി.എഫ് ഫയലുകളും (Reports & PDF Exports)</div>
+        <p style="font-size: 14px; color: #64748b; margin-top: -10px;">ഗ്രൂപ്പ് തിരിഞ്ഞോ മത്സരം തിരിഞ്ഞോ ഉള്ള ലിസ്റ്റുകൾ സെലക്ട് ചെയ്ത് താഴെ കാണാം.</p>
+        
+        <div class="flex-box">
+            <select id="report-type" onchange="toggleInputs()">
+                <option value="team">ഗ്രൂപ്പ് അടിസ്ഥാനത്തിൽ (Team List)</option>
+                <option value="event">മത്സര അടിസ്ഥാനത്തിൽ (Event List)</option>
+            </select>
+            
+            <select id="team-select">
+                <option value="ബദർ">ബദർ</option>
+                <option value="ഉഹ്ദ്">ഉഹ്ദ്</option>
+                <option value="ഹുനൈൻ">ഹുനൈൻ</option>
+            </select>
+
+            <select id="event-select" style="display:none;">
+                <option value="കേട്ടെഴുത്ത്">കേട്ടെഴുത്ത്</option>
+                <option value="കളറിംഗ്">കളറിംഗ്</option>
+                <option value="ക്വിസ്">ക്വിസ്</option>
+                <option value="മാലപ്പാട്ട്">മാലപ്പാട്ട്</option>
+            </select>
+
+            <button onclick="loadReportData()">ലിസ്റ്റ് കാണുക</button>
+            <button class="btn-pdf" onclick="window.print()">📥 PDF ഡൗൺലോഡ്</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">🔒 നിയന്ത്രിത പ്രവേശനം (Role-based Access Control)</div>
+        <p style="font-size: 14px; color: #64748b; margin-top: -10px;">അഡ്മിൻ, സ്റ്റാഫ്, ജഡ്ജ് എന്നിവർക്ക് അവരുടെ റോളുകൾ അനുസരിച്ച് മാത്രം ലോഗിൻ ചെയ്യാനുള്ള സുരക്ഷാ സംവിധാനം.</p>
+        <div class="flex-box">
+            <select id="role-select">
+                <option value="admin">സൂപ്പർ അഡ്മിൻ (Super Admin)</option>
+                <option value="staff">മദ്രസ സ്റ്റാഫ് (Staff)</option>
+                <option value="judge">ന്യായാധിപൻ (Judge)</option>
+            </select>
+            <input type="password" id="role-pass" placeholder="പാസ്‌വേഡ് നൽകുക">
+            <button onclick="verifyRoleAccess()" style="background:#6f42c1;">പാനൽ തുറക്കുക</button>
+        </div>
+    </div>
+
+    <hr style="border:0; height:1px; background:#e2e8f0; margin:30px 0;">
+
+    <div class="print-header" id="p-header">
+        <h2 style="margin:0;">മദ്രസ ഫെസ്റ്റ് ഒഫീഷ്യൽ റിപ്പോർട്ട്</h2>
+        <p id="p-sub" style="margin:5px 0 20px 0; font-weight:bold;"></p>
+    </div>
+
+    <div id="table-output">
+        <p style="text-align:center; color:#94a3b8; padding:20px;">ലിസ്റ്റ് കാണാൻ മുകളിലെ ബട്ടൺ ക്ലിക്ക് ചെയ്യുക.</p>
+    </div>
+</div>
+
+<script>
+    function toggleInputs() {
+        const type = document.getElementById('report-type').value;
+        document.getElementById('team-select').style.display = type === 'team' ? 'block' : 'none';
+        document.getElementById('event-select').style.display = type === 'event' ? 'block' : 'none';
+    }
+
+    async function loadReportData() {
+        const type = document.getElementById('report-type').value;
+        let subText = "";
+        let filtered = [];
+
+        try {
+            const res = await fetch('/api/students');
+            const students = await res.json();
+
+            if (type === 'team') {
+                const team = document.getElementById('team-select').value;
+                subText = `ഗ്രൂപ്പ് ലിസ്റ്റ്: ${team}`;
+                filtered = students.filter(s => s.team === team);
+            } else {
+                const ev = document.getElementById('event-select').value;
+                subText = `മത്സരത്തിൽ പങ്കെടുക്കുന്നവർ: ${ev}`;
+                filtered = students.filter(s => s.events && s.events.includes(ev));
+            }
+
+            document.getElementById('p-sub').textContent = subText;
+
+            let html = `<table>
+                <thead>
+                    <tr>
+                        <th>Chess No</th>
+                        <th>പേര് (Name)</th>
+                        <th>ടീം (Team)</th>
+                        <th>വിഭാഗം (Category)</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            if(filtered.length === 0) {
+                html += `<tr><td colspan="4" style="text-align:center;">കുട്ടികളെ കണ്ടെത്തിയിട്ടില്ല!</td></tr>`;
+            } else {
+                filtered.forEach(s => {
+                    html += `<tr>
+                        <td><b>${s.id}</b></td>
+                        <td>${s.name}</td>
+                        <td>${s.team || '-'}</td>
+                        <td>${s.category || '-'}</td>
+                    </tr>`;
+                });
+            }
+            html += `</tbody></table>`;
+            document.getElementById('table-output').innerHTML = html;
+
+        } catch(err) {
+            alert("ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!");
+        }
+    }
+
+    function verifyRoleAccess() {
+        const role = document.getElementById('role-select').value;
+        const pass = document.getElementById('role-pass').value;
+        
+        if(!pass) { alert("ദയവായി പാസ്‌വേഡ് ടൈപ്പ് ചെയ്യുക!"); return; }
+        
+        // താൽക്കാലിക സുരക്ഷാ പരിശോധന (നിങ്ങൾക്ക് ഇഷ്ടമുള്ള പാസ്‌വേഡ് മാറ്റാം)
+        if(role === 'admin' && pass === 'admin123') {
+            window.location.href = '/admin.html';
+        } else if(role === 'judge' && pass === 'judge123') {
+            window.location.href = '/judge.html';
+        } else if(role === 'staff' && pass === 'staff123') {
+            window.location.href = '/add.html';
+        } else {
+            alert("തെറ്റായ പാസ്‌വേഡ് അല്ലെങ്കിൽ അനുമതി നിഷേധിക്കപ്പെട്ടു!");
+        }
+    }
+</script>
+</body>
+</html>
