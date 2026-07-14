@@ -9,11 +9,11 @@
         .container { max-width: 850px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0px 8px 20px rgba(0,0,0,0.06); }
         .nav-bar { display: flex; justify-content: space-between; align-items: center; background: #6f42c1; color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 25px; }
         .nav-bar a { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 5px; }
-        
+
         h2 { color: #2c3e50; margin-top: 0; }
         .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .card-title { font-size: 18px; font-weight: bold; color: #4a148c; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-        
+
         .flex-box { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         select, input, button { padding: 10px 15px; font-size: 15px; border-radius: 6px; border: 1px solid #cbd5e1; }
         button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; }
@@ -25,10 +25,15 @@
         th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
         th { background-color: #f8fafc; color: #334155; }
 
-        /* പ്രിന്റ് ചെയ്യുമ്പോൾ ടേബിൾ മാത്രം വരാൻ */
+        /* 🟢 പുതിയ പാനലുകൾക്കുള്ള സ്പെഷ്യൽ സ്റ്റൈൽ */
+        .role-panel { display: none; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        #adminDiv { background: #e3f2fd; border-left-color: #0d6efd; }
+        #staffDiv { background: #e8f5e9; border-left-color: #198754; }
+        #judgeDiv { background: #fff3e0; border-left-color: #ffc107; }
+
         @media print {
             body { background: white; padding: 0; }
-            .nav-bar, .card, h2, p, hr { display: none !important; }
+            .nav-bar, .card, h2, p, hr, .role-panel { display: none !important; }
             .container { box-shadow: none; padding: 0; max-width: 100%; }
             table { width: 100%; border: 1px solid black; }
             th, td { border: 1px solid black; padding: 8px; font-size: 14px; color: black; }
@@ -51,13 +56,13 @@
     <div class="card">
         <div class="card-title">📄 റിപ്പോർട്ടുകളും പി.ഡി.എഫ് ഫയലുകളും (Reports & PDF Exports)</div>
         <p style="font-size: 14px; color: #64748b; margin-top: -10px;">ഗ്രൂപ്പ് തിരിഞ്ഞോ മത്സരം തിരിഞ്ഞോ ഉള്ള ലിസ്റ്റുകൾ സെലക്ട് ചെയ്ത് താഴെ കാണാം.</p>
-        
+
         <div class="flex-box">
             <select id="report-type" onchange="toggleInputs()">
                 <option value="team">ഗ്രൂപ്പ് അടിസ്ഥാനത്തിൽ (Team List)</option>
                 <option value="event">മത്സര അടിസ്ഥാനത്തിൽ (Event List)</option>
             </select>
-            
+
             <select id="team-select">
                 <option value="ബദർ">ബദർ</option>
                 <option value="ഉഹ്ദ്">ഉഹ്ദ്</option>
@@ -76,65 +81,49 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="role-access-card"> 
         <div class="card-title">🔒 നിയന്ത്രിത പ്രവേശനം (Role-based Access Control)</div>
         <p style="font-size: 14px; color: #64748b; margin-top: -10px;">അഡ്മിൻ, സ്റ്റാഫ്, ജഡ്ജ് എന്നിവർക്ക് അവരുടെ റോളുകൾ അനുസരിച്ച് മാത്രം ലോഗിൻ ചെയ്യാനുള്ള സുരക്ഷാ സംവിധാനം.</p>
         <div class="flex-box">
             <select id="role-select">
                 <option value="admin">സൂപ്പർ അഡ്മിൻ (Super Admin)</option>
                 <option value="staff">മദ്രസ സ്റ്റാഫ് (Staff)</option>
-                <option value="judge">ന്യായാധിപൻ (Judge)</option>
+                <option value="judge">精度ന്യായാധിപൻ (Judge)</option>
             </select>
             <input type="password" id="role-pass" placeholder="പാസ്‌വേഡ് നൽകുക">
             <button onclick="verifyRoleAccess()" style="background:#6f42c1;">പാനൽ തുറക്കുക</button>
         </div>
     </div>
-<div class="card" style="border-top: 3px solid #fd7e14;">
-    <h3 style="color: #fd7e14;">⚙️ സെർവർ പാസ്‌വേഡ് മാറ്റുക</h3>
-    <p style="font-size: 13px; color: #666;">ഏത് റോളിന്റെ പാസ്‌വേഡ് ആണോ മാറ്റേണ്ടത് അത് തിരഞ്ഞെടുത്ത് പുതിയ പാസ്‌വേഡ് നൽകുക.</p>
-    <div class="flex">
-        <select id="change-role-select">
-            <option value="admin">Super Admin</option>
-            <option value="staff">Staff (മദ്രസ സ്റ്റാഫ്)</option>
-            <option value="judge">Judge (ന്യായാധിപൻ)</option>
-        </select>
-        
-        <input type="password" id="new-role-pass" placeholder="പുതിയ പാസ്‌വേഡ്">
-        
-        <button onclick="updatePassword()" style="background: #fd7e14; font-weight: bold;">സ്ഥിരമായി മാറ്റുക</button>
-    </div>
-</div>
 
-<script>
-// പാസ്‌വേഡ് മാറ്റാനുള്ള ഫങ്ക്ഷൻ
-async function updatePassword() {
-    const role = document.getElementById('change-role-select').value;
-    const newPassword = document.getElementById('new-role-pass').value.trim();
-    
-    if(!newPassword) {
-        alert("ദയവായി പുതിയ പാസ്‌വേഡ് ടൈപ്പ് ചെയ്യുക!");
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/update-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role, newPassword })
-        });
-        
-        const result = await response.json();
-        if(result.success) {
-            alert("🔒 പാസ്‌വേഡ് വിജയകരമായി മാറ്റിയിരിക്കുന്നു!");
-            document.getElementById('new-role-pass').value = '';
-        } else {
-            alert("🛑 പാസ്‌വേഡ് മാറ്റാൻ സാധിച്ചില്ല!");
-        }
-    } catch (err) {
-        alert("സെർവർ ബന്ധിപ്പിക്കുന്നതിൽ പരാജയം!");
-    }
-}
-</script>
+    <div id="adminDiv" class="role-panel">
+        <h3 style="color: #0d6efd; margin-top: 0;">💻 സൂപ്പർ അഡ്മിൻ കൺട്രോൾ പാനൽ</h3>
+        <p>സ്വാഗതം അഡ്മിൻ! പുതിയ വിദ്യാർത്ഥികളെ ചേർക്കാനും മാറ്റങ്ങൾ വരുത്താനുമായി നിങ്ങൾക്ക് താഴെയുള്ള ബട്ടൺ ഉപയോഗിച്ച് ഹോം പേജിലേക്ക് പോകാം.</p>
+        <a href="/" style="display: inline-block; padding: 10px 20px; background: #0d6efd; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">🏠 ഹോം പേജിലേക്ക് പോവുക</a>
+    </div>
+
+    <div id="staffDiv" class="role-panel">
+        <h3 style="color: #198754; margin-top: 0;">📝 സ്റ്റാഫ് ഡാഷ്‌ബോർഡ്</h3>
+        <p>സ്വാഗതം സ്റ്റാഫ്! മദ്രസ ഫെസ്റ്റുമായി ബന്ധപ്പെട്ട വിദ്യാർത്ഥികളുടെ മാർക്ക് ഷീറ്റുകളും മറ്റ് ക്രമീകരണങ്ങളും താഴെ ലഭ്യമാണ്.</p>
+    </div>
+
+    <div id="judgeDiv" class="role-panel">
+        <h3 style="color: #ffc107; margin-top: 0;">⚖️ ന്യായാധിപൻ (Judge) ഡാഷ്‌ബോർഡ്</h3>
+        <p>സ്വാഗതം ബഹുമാനപ്പെട്ട ജഡ്ജി! മത്സരഫലങ്ങൾ വിലയിരുത്തുന്നതിനും മാർക്കുകൾ ചേർക്കുന്നതിനുമുള്ള നിയന്ത്രണം നിങ്ങൾക്ക് ഇവിടെ ലഭ്യമാണ്.</p>
+    </div>
+
+    <div class="card" style="border-top: 3px solid #fd7e14;">
+        <h3 style="color: #fd7e14; margin-top: 0;">⚙️ സെർവർ പാസ്‌വേഡ് മാറ്റുക</h3>
+        <p style="font-size: 13px; color: #666;">ഏത് റോളിന്റെ പാസ്‌വേഡ് ആണോ മാറ്റേണ്ടത് അത് തിരഞ്ഞെടുത്ത് പുതിയ പാസ്‌വേഡ് നൽകുക.</p>
+        <div class="flex-box">
+            <select id="change-role-select">
+                <option value="admin">Super Admin</option>
+                <option value="staff">Staff (മദ്രസ സ്റ്റാഫ്)</option>
+                <option value="judge">Judge (ന്യായാധിപൻ)</option>
+            </select>
+            <input type="password" id="new-role-pass" placeholder="പുതിയ പാസ്‌വേഡ്">
+            <button onclick="updatePassword()" style="background: #fd7e14; font-weight: bold;">സ്ഥിരമായി മാറ്റുക</button>
+        </div>
+    </div>
 
     <hr style="border:0; height:1px; background:#e2e8f0; margin:30px 0;">
 
@@ -207,64 +196,87 @@ async function updatePassword() {
         }
     }
 
-async function verifyRoleAccess() {
-    const role = document.getElementById('role-select').value;
-    const password = document.getElementById('role-pass').value.trim();
-    
-    if(!password) {
-        alert("ദയവായി പാസ്‌വേഡ് ടൈപ്പ് ചെയ്യുക!");
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/verify-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role, password })
-        });
-        
-        const result = await response.json();
-        if(result.success) {
-            alert("🔓 പ്രവേശനം അനുവദിച്ചിരിക്കുന്നു!");
-            
-            // 1. ലോഗിൻ ബോക്സ് ഒളിപ്പിക്കുന്നു (നിങ്ങളുടെ പഴയ കോഡ് അനുസരിച്ച്)
-            const loginCard = document.getElementById('role-access-card') || document.querySelector('.card');
-            if (loginCard) {
-                loginCard.style.display = 'none';
-            }
-            
-            // 2. നിങ്ങളുടെ പേജിലെ യഥാർത്ഥ ഐഡികൾ വെച്ച് പാനലുകൾ കണ്ടെത്തുന്നു (adminDiv, staffDiv, judgeDiv)
-            const adminPanel = document.getElementById('adminDiv');
-            const staffPanel = document.getElementById('staffDiv');
-            const judgePanel = document.getElementById('judgeDiv');
-            
-            // ആദ്യം എല്ലാം മറയ്ക്കുന്നു
-            if(adminPanel) adminPanel.style.display = 'none';
-            if(staffPanel) staffPanel.style.display = 'none';
-            if(judgePanel) judgePanel.style.display = 'none';
-            
-            // ലോഗിൻ ചെയ്ത റോളിന് അനുസരിച്ച് കൃത്യമായ പാനൽ കാണിക്കുന്നു
-            if (role === 'admin' && adminPanel) {
-                adminPanel.style.display = 'block';
-            } else if (role === 'staff' && staffPanel) {
-                staffPanel.style.display = 'block';
-            } else if (role === 'judge' && judgePanel) {
-                judgePanel.style.display = 'block';
-            }
-            
-            // ഡാറ്റ ലോഡ് ചെയ്യാനുള്ള ഫങ്ക്ഷൻ വിളിക്കുന്നു
-            if (typeof loadStudents === 'function') {
-                loadStudents();
-            }
-            
-        } else {
-            alert("🛑 തെറ്റായ പാസ്‌വേഡ്!");
-        }
-    } catch (err) {
-        alert("സെർവറുമായി ബന്ധിപ്പിക്കുന്നതിൽ പരാജയം!");
-    }
-}
+    async function updatePassword() {
+        const role = document.getElementById('change-role-select').value;
+        const newPassword = document.getElementById('new-role-pass').value.trim();
 
+        if(!newPassword) {
+            alert("ദയവായി പുതിയ പാസ്‌വേഡ് ടൈപ്പ് ചെയ്യുക!");
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/update-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role, newPassword })
+            });
+
+            const result = await response.json();
+            if(result.success) {
+                alert("🔒 പാസ്‌വേഡ് വിജയകരമായി മാറ്റിയിരിക്കുന്നു!");
+                document.getElementById('new-role-pass').value = '';
+            } else {
+                alert("🛑 പാസ്‌വേഡ് മാറ്റാൻ സാധിച്ചില്ല!");
+            }
+        } catch (err) {
+            alert("സെർവർ ബന്ധിപ്പിക്കുന്നതിൽ പരാജയം!");
+        }
+    }
+
+    async function verifyRoleAccess() {
+        const role = document.getElementById('role-select').value;
+        const password = document.getElementById('role-pass').value.trim();
+
+        if(!password) {
+            alert("ദയവായി പാസ്‌വേഡ് ടൈപ്പ് ചെയ്യുക!");
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/verify-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role, password })
+            });
+
+            const result = await response.json();
+            if(result.success) {
+                alert("🔓 പ്രവേശനം അനുവദിച്ചിരിക്കുന്നു!");
+
+                // 1. ലോഗിൻ ബോക്സ് ഒളിപ്പിക്കുന്നു
+                const loginCard = document.getElementById('role-access-card');
+                if (loginCard) {
+                    loginCard.style.display = 'none';
+                }
+
+                // 2. പാനലുകൾ കണ്ടെത്തുന്നു
+                const adminPanel = document.getElementById('adminDiv');
+                const staffPanel = document.getElementById('staffDiv');
+                const judgePanel = document.getElementById('judgeDiv');
+
+                // ആദ്യം എല്ലാം മറയ്ക്കുന്നു
+                if(adminPanel) adminPanel.style.display = 'none';
+                if(staffPanel) staffPanel.style.display = 'none';
+                if(judgePanel) judgePanel.style.display = 'none';
+
+                // ലോഗിൻ ചെയ്ത റോളിന് അനുസരിച്ച് കൃത്യമായ പാനൽ കാണിക്കുന്നു
+                if (role === 'admin' && adminPanel) {
+                    adminPanel.style.display = 'block';
+                } else if (role === 'staff' && staffPanel) {
+                    staffPanel.style.display = 'block';
+                } else if (role === 'judge' && judgePanel) {
+                    judgePanel.style.display = 'block';
+                }
+
+            } else {
+                alert("🛑 തെറ്റായ പാസ്‌വേഡ്!");
+            }
+        } catch (err) {
+            alert("സെർവറുമായി ബന്ധിപ്പിക്കുന്നതിൽ പരാജയം!");
+        }
+    }
 </script>
 </body>
 </html>
+
