@@ -55,7 +55,9 @@ app.post('/api/update-password', (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid password" });
     }
     
-    let passwords = JSON.parse(fs.readFileSync(PASS_FILE));
+    const PASS_FILE = path.join(__dirname, 'passwords.json');
+let passwords = JSON.parse(fs.readFileSync(PASS_FILE));
+
     
     // പുതിയ പാസ്‌വേഡ് അപ്‌ഡേറ്റ് ചെയ്യുന്നു
     passwords[role] = newPassword;
