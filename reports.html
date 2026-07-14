@@ -89,6 +89,52 @@
             <button onclick="verifyRoleAccess()" style="background:#6f42c1;">പാനൽ തുറക്കുക</button>
         </div>
     </div>
+<div class="card" style="border-top: 3px solid #fd7e14;">
+    <h3 style="color: #fd7e14;">⚙️ സെർവർ പാസ്‌വേഡ് മാറ്റുക</h3>
+    <p style="font-size: 13px; color: #666;">ഏത് റോളിന്റെ പാസ്‌വേഡ് ആണോ മാറ്റേണ്ടത് അത് തിരഞ്ഞെടുത്ത് പുതിയ പാസ്‌വേഡ് നൽകുക.</p>
+    <div class="flex">
+        <select id="change-role-select">
+            <option value="admin">Super Admin</option>
+            <option value="staff">Staff (മദ്രസ സ്റ്റാഫ്)</option>
+            <option value="judge">Judge (ന്യായാധിപൻ)</option>
+        </select>
+        
+        <input type="password" id="new-role-pass" placeholder="പുതിയ പാസ്‌വേഡ്">
+        
+        <button onclick="updatePassword()" style="background: #fd7e14; font-weight: bold;">സ്ഥിരമായി മാറ്റുക</button>
+    </div>
+</div>
+
+<script>
+// പാസ്‌വേഡ് മാറ്റാനുള്ള ഫങ്ക്ഷൻ
+async function updatePassword() {
+    const role = document.getElementById('change-role-select').value;
+    const newPassword = document.getElementById('new-role-pass').value.trim();
+    
+    if(!newPassword) {
+        alert("ദയവായി പുതിയ പാസ്‌വേഡ് ടൈപ്പ് ചെയ്യുക!");
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/update-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role, newPassword })
+        });
+        
+        const result = await response.json();
+        if(result.success) {
+            alert("🔒 പാസ്‌വേഡ് വിജയകരമായി മാറ്റിയിരിക്കുന്നു!");
+            document.getElementById('new-role-pass').value = '';
+        } else {
+            alert("🛑 പാസ്‌വേഡ് മാറ്റാൻ സാധിച്ചില്ല!");
+        }
+    } catch (err) {
+        alert("സെർവർ ബന്ധിപ്പിക്കുന്നതിൽ പരാജയം!");
+    }
+}
+</script>
 
     <hr style="border:0; height:1px; background:#e2e8f0; margin:30px 0;">
 

@@ -48,6 +48,22 @@ app.post('/api/register-event', (req, res) => {
         }
     });
 });
+app.post('/api/update-password', (req, res) => {
+    const { role, newPassword } = req.body;
+    
+    if (!newPassword || newPassword.trim() === "") {
+        return res.status(400).json({ success: false, message: "Invalid password" });
+    }
+    
+    let passwords = JSON.parse(fs.readFileSync(PASS_FILE));
+    
+    // പുതിയ പാസ്‌വേഡ് അപ്‌ഡേറ്റ് ചെയ്യുന്നു
+    passwords[role] = newPassword;
+    
+    // ഫയലിലേക്ക് സ്ഥിരമായി മാറ്റിയെഴുതുന്നു
+    fs.writeFileSync(PASS_FILE, JSON.stringify(passwords, null, 4));
+    res.json({ success: true });
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
