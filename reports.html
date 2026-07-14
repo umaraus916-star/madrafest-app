@@ -227,23 +227,23 @@ async function verifyRoleAccess() {
         if(result.success) {
             alert("🔓 പ്രവേശനം അനുവദിച്ചിരിക്കുന്നു!");
             
-            // 🟢 1. ലോഗിൻ ബോക്സ് സുരക്ഷിതമായി മറയ്ക്കുന്നു (എറർ വരികയേ ഇല്ല)
+            // 1. ലോഗിൻ ബോക്സ് ഒളിപ്പിക്കുന്നു (നിങ്ങളുടെ പഴയ കോഡ് അനുസരിച്ച്)
             const loginCard = document.getElementById('role-access-card') || document.querySelector('.card');
             if (loginCard) {
                 loginCard.style.display = 'none';
             }
             
-            // 🟢 2. പാനലുകൾ സുരക്ഷിതമായി കണ്ടെത്തുന്നു
-            const adminPanel = document.getElementById('admin-panel') || document.getElementById('admin-section') || document.getElementById('adminDiv');
-            const staffPanel = document.getElementById('staff-panel') || document.getElementById('staff-section') || document.getElementById('staffDiv');
-            const judgePanel = document.getElementById('judge-panel') || document.getElementById('judge-section') || document.getElementById('judgeDiv');
+            // 2. നിങ്ങളുടെ പേജിലെ യഥാർത്ഥ ഐഡികൾ വെച്ച് പാനലുകൾ കണ്ടെത്തുന്നു (adminDiv, staffDiv, judgeDiv)
+            const adminPanel = document.getElementById('adminDiv');
+            const staffPanel = document.getElementById('staffDiv');
+            const judgePanel = document.getElementById('judgeDiv');
             
-            // ആദ്യം എല്ലാ പാനലുകളും ഉണ്ടെങ്കിൽ മറയ്ക്കുന്നു
+            // ആദ്യം എല്ലാം മറയ്ക്കുന്നു
             if(adminPanel) adminPanel.style.display = 'none';
             if(staffPanel) staffPanel.style.display = 'none';
             if(judgePanel) judgePanel.style.display = 'none';
             
-            // ലോഗിൻ ചെയ്ത റോളിന് അനുസരിച്ച് പാനൽ ഓൺ ചെയ്യുന്നു
+            // ലോഗിൻ ചെയ്ത റോളിന് അനുസരിച്ച് കൃത്യമായ പാനൽ കാണിക്കുന്നു
             if (role === 'admin' && adminPanel) {
                 adminPanel.style.display = 'block';
             } else if (role === 'staff' && staffPanel) {
@@ -252,16 +252,15 @@ async function verifyRoleAccess() {
                 judgePanel.style.display = 'block';
             }
             
-            // വിദ്യാർത്ഥികളുടെ വിവരങ്ങൾ ലോഡ് ചെയ്യാനുള്ള ഫങ്ക്ഷൻ ഉണ്ടെങ്കിൽ അത് റൺ ചെയ്യുന്നു
-            if (typeof loadStudents === 'function') loadStudents();
-            if (typeof fetchStudents === 'function') fetchStudents();
+            // ഡാറ്റ ലോഡ് ചെയ്യാനുള്ള ഫങ്ക്ഷൻ വിളിക്കുന്നു
+            if (typeof loadStudents === 'function') {
+                loadStudents();
+            }
             
         } else {
             alert("🛑 തെറ്റായ പാസ്‌വേഡ്!");
         }
     } catch (err) {
-        // ലോഗിൻ fetch റിക്വസ്റ്റിൽ ശരിക്കും പ്രശ്നമുണ്ടെങ്കിൽ മാത്രം ഇത് കാണിക്കും
-        console.error(err);
         alert("സെർവറുമായി ബന്ധിപ്പിക്കുന്നതിൽ പരാജയം!");
     }
 }
