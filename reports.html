@@ -217,7 +217,6 @@ async function updatePassword() {
     }
     
     try {
-        // പുതിയ പാസ്‌വേഡ് സെർവറുമായി ഒത്തുനോക്കുന്നു
         const response = await fetch('/api/verify-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -227,7 +226,20 @@ async function updatePassword() {
         const result = await response.json();
         if(result.success) {
             alert("🔓 പ്രവേശനം അനുവദിച്ചിരിക്കുന്നു!");
-            // ലോഗിൻ വിജയിച്ചാൽ ചെയ്യേണ്ട കാര്യങ്ങൾ ഇവിടെ നൽകാം (ഉദാഹരണത്തിന് പാനൽ തുറക്കുക)
+            
+            // 🟢 വിജയിച്ചാൽ പഴയതുപോലെ പാനലുകൾ തുറക്കാനുള്ള ഭാഗം:
+            // ലോഗിൻ ബോക്സ് മറക്കുന്നു
+            document.getElementById('role-access-card').style.display = 'none';
+            
+            // അതത് റോളുകളുടെ പാനലുകൾ കാണിക്കുന്നു
+            if (role === 'admin') {
+                document.getElementById('admin-panel').style.display = 'block';
+            } else if (role === 'staff') {
+                document.getElementById('staff-panel').style.display = 'block';
+            } else if (role === 'judge') {
+                document.getElementById('judge-panel').style.display = 'block';
+            }
+            
         } else {
             alert("🛑 തെറ്റായ പാസ്‌വേഡ്!");
         }
